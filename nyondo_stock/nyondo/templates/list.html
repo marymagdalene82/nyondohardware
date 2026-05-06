@@ -1,0 +1,44 @@
+{% extends 'base.html' %} {% block content %}
+<div class="card-custom stock-table-card">
+  <div class="card-custom-body stock-table-body">
+    <div class="table-responsive">
+      <table class="table table-custom stock-table">
+        <thead class="stock-table-head">
+          <tr>
+            <th>Date</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Variant</th>
+            <th>Stock</th>
+            <th>Cost Price</th>
+            <th>Selling Price</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for product in products %}
+          <tr class="stock-row">
+            <td>{{ product.date_added|date:"F j" }}</td>
+            <td class="fw-semibold">{{ product.product_name }}</td>
+            <td>{{ product.category }}</td>
+            <td class="text-muted">{{ product.variant }}</td>
+            <td>{{ product.stock }}</td>
+            <td>{{ product.unit_cost }}</td>
+            <td>{{ product.unit_price }}</td>
+            <td class="text-end">
+              <div class="d-inline-flex gap-1">
+                <a href="" class="btn btn-xs btn-primary" title="Edit"><i class="bi bi-pencil"></i></a>
+                <a href="" class="btn btn-xs btn-danger" title="Delete"><i class="bi bi-trash"></i></a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

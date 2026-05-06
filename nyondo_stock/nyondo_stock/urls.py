@@ -16,7 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from nyondo import views as web_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # Path for the add product view
+    path('add_product/', web_views.product_create, name='add_product'),
+    # Default path to display the form and products
+    path('product_list/', web_views.product_list, name='product_list'),
 ]
