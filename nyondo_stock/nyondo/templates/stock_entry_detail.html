@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h4 class="mb-0">Stock Entry</h4>
+      <small class="text-muted">{{ entry.created_at|date:"d M Y, H:i" }}</small>
+    </div>
+    <div class="d-flex gap-2">
+      {% if entry.balance_due > 0 %}
+      <a class="btn btn-outline-warning" href="{% url 'stock_entry_pay' entry.pk %}">
+        <i class="bi bi-cash"></i> Pay
+      </a>
+      {% endif %}
+      <a class="btn btn-outline-secondary" href="{% url 'stock_entry_list' %}">Back</a>
+    </div>
+  </div>
+
+  <div class="card-custom stock-table-card">
+    <div class="card-custom-body stock-table-body">
+      <div class="row g-3">
+        <div class="col-md-4"><strong>Product:</strong> {{ entry.product.product_name }}</div>
+        <div class="col-md-4"><strong>Supplier:</strong> {{ entry.supplier.name }}</div>
+        <div class="col-md-4"><strong>Quantity:</strong> {{ entry.quantity }}</div>
+
+        <div class="col-md-4"><strong>Unit Cost:</strong> UGX {{ entry.unit_cost }}</div>
+        <div class="col-md-4"><strong>Total:</strong> UGX {{ entry.total|floatformat:0 }}</div>
+        <div class="col-md-4"><strong>Credit:</strong> {% if entry.is_credit %}Yes{% else %}No{% endif %}</div>
+
+        <div class="col-md-4"><strong>Amount Paid:</strong> UGX {{ entry.amount_paid|floatformat:0 }}</div>
+        <div class="col-md-4"><strong>Balance Due:</strong> UGX {{ entry.balance_due|floatformat:0 }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

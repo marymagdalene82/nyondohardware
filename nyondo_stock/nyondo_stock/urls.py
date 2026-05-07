@@ -14,14 +14,25 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path
 from nyondo import views as web_views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
     # Path for the add product view
-    path('add_product/', web_views.product_create, name='add_product'),
+    path("add_product/", web_views.product_create, name="add_product"),
     # Default path to display the form and products
-    path('product_list/', web_views.product_list, name='product_list'),
+    path("product_list/", web_views.product_list, name="product_list"),
+    # Path to handle adding stock when suppliers deliver products
+    path("stock/add/", web_views.add_stock, name="add_stock"),
+    path("products/<int:pk>/delete/", web_views.product_delete, name="product_delete"),
+    path("products/<int:pk>/", web_views.product_detail, name="product_detail"),
+    # Path to view stock levels and product details
+    path("stock/history/", web_views.stock_entry_list, name="stock_entry_list"),
+    path("products/<int:pk>/edit/", web_views.product_edit, name="product_edit"),
+    path("stock/<int:pk>/", web_views.stock_entry_detail, name="stock_entry_detail"),
+    path("stock/<int:pk>/pay/", web_views.stock_entry_pay, name="stock_entry_pay"),
+    
 ]

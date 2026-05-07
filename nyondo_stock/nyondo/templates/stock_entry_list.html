@@ -1,0 +1,103 @@
+{% extends 'base.html' %} {% block content %}
+<div class="d-flex justify-content-between list-header align-items-center mb-4 mt-4">
+    <div>
+        <h4>Stock Arrival List</h4>
+    </div>
+
+    <div class="d-flex gap-2 justify-content-end shortcuts">
+
+        <a href="{% url 'stock_entry_list' %}?credit_only=1" class="btn btn-outline-dark">
+            <i class="bi bi-hourglass-split me-1"></i>Credit Only
+        </a>
+        <a href="{% url 'add_stock' %}" class="btn btn-warning"><i class="bi bi-plus-lg me-1"></i>Add Stock</a>
+    </div>
+
+</div>
+
+{% if credit_only %}
+<div class="alert alert-warning"><i class="bi bi-info-circle me-1"></i>Showing credit arrivals with outstanding balances
+    only. <a href="{% url 'stock_entry_list' %}">Clear filter</a></div>
+{% endif %}
+
+<div class="card-custom stock-table-card">
+    <div class="card-custom-body stock-table-body">
+        <div class="table-responsive">
+            <table class="table table-custom stock-table">
+                <thead class="stock-table-head">
+                    <tr>
+                        <th>Date</th>
+                        <th>Product</th>
+                        <th>Supplier</th>
+                        <th>Quantity</th>
+                        <th>Unit Cost</th>
+                        <th>Total Value</th>
+                        <th>On Credit</th>
+                        <th>Balance Due</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for entry in entries %}
+                    <tr class="stock-row">
+                        <td>{{ entry.created_at|date:"F j" }}</td>
+
+                        <td>
+                            <a href="#" class="product-link fw-semibold">
+                                {{ entry.product.product_name }}
+                            </a>
+                            {% if entry.product.variant %}
+                            <div class="text-muted small">{{ entry.product.variant }}</div>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ entry.supplier.name }}</td>
+
+                        <td>{{ entry.quantity }}</td>
+
+                        <td>UGX {{ entry.unit_cost }}</td>
+
+                        <td>UGX {{ entry.total|floatformat:0 }}</td>
+
+                        <td>
+                            {% if entry.is_credit %}
+                            <span class="badge bg-warning text-dark"> Credit </span>
+                            {% else %}
+                            <span class="badge bg-success"> Paid </span>
+                            {% endif %}
+                        </td>
+
+                        <td>UGX {{ entry.balance_due }}</td>
+
+                        <td class="text-end">
+                            <div class="d-inline-flex gap-1">
+                                {% if entry.balance_due > 0 %}
+                                <a href="{% url 'stock_entry_pay' entry.pk %}" class="btn btn-sm btn-outline-warning"
+                                    title="Pay Balance">
+                                    <i class="bi bi-cash"></i>
+                                </a>
+                                {% endif %}
+                                
+                            
+                                <a href="{% url 'stock_entry_detail' entry.pk %}" class="btn btn-sm btn-outline-primary" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+
+                            </div>
+                        </td>
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+                        <td colspan="9" class="text-center py-4">No stock entries yet.</td>
+                    </tr>
+
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

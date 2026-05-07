@@ -1,0 +1,97 @@
+{% extends 'base.html' %} {% block content %}
+<div class="container-fluid form-container">
+  <div class="row justify-content-center stock-register-layout">
+    <div class="col form-area">
+      <!-- Form Area -->
+
+      <div class="container form-wrapper">
+        <div class="page-title mb-4">
+          <h3>Stock Arrival Entry</h3>
+          <p>Record newly arrived stock from suppliers</p>
+        </div>
+
+        <div class="card-custom">
+          <div class="section-title">Product Information</div>
+
+          <form method="post" action="{% url 'add_stock' %}">
+            {% csrf_token %}
+            <div class="row g-4">
+              <!-- Product -->
+              <div class="col-md-4">
+                <label class="form-label">Product</label>
+                <select name="product" class="form-select">
+                  <option value="" selected disabled>Select Product</option>
+                  {% for p in products %}
+                  <option value="{{ p.id }}">{{ p.product_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <!-- Supplier -->
+              <div class="col-md-4">
+                <label class="form-label">Supplier</label>
+                <select name="supplier" class="form-select">
+                  <option value="" selected disabled>Select Supplier</option>
+                  {% for s in suppliers %}
+                  <option value="{{ s.id }}">{{ s.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <!-- Quantity -->
+              <div class="col-md-4">
+                <label class="form-label">Quantity Received</label>
+                <input type="number" name="quantity" class="form-control" placeholder="Enter quantity" />
+              </div>
+
+              <!-- Unit Cost -->
+              <div class="col-md-4">
+                <label class="form-label">Unit Cost (UGX)</label>
+                <input type="number" name="unit_cost" class="form-control" placeholder="Enter unit cost" />
+              </div>
+
+              <!-- Selling Price -->
+              <div class="col-md-4">
+                <label class="form-label">Selling Price (UGX)</label>
+                <input type="number" name="unit_price" class="form-control" placeholder="Enter selling price" />
+              </div>
+
+              <!-- Payment Type -->
+              <div class="col-md-4">
+                <label class="form-label">Payment Type</label>
+                <select name="is_credit" class="form-select">
+                  <option selected disabled>Select payment type</option>
+                  <option value="False">Cash</option>
+                  <option value="True">Credit</option>
+                </select>
+              </div>
+
+
+
+              <!-- Amount Paid -->
+              <div class="col-md-4">
+                <label class="form-label">Amount Paid (UGX)</label>
+                <input type="number" name="amount_paid" class="form-control" placeholder="Enter amount paid" />
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-center gap-3 mt-5">
+              <button type="submit" class="btn-save btn btn-primary">
+                <i class="bi bi-check-circle"></i>
+                Save Entry
+              </button>
+
+              <button type="reset" class="btn btn-outline-danger btn-cancel">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stock list goes here -->
+
+{% endblock %}

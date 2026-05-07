@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid form-container">
+  <div class="row justify-content-center stock-register-layout">
+    <div class="col form-area">
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-heading"><h5>Edit Product</h5></div>
+
+        <div class="row my-4">
+          <div class="col">
+            <label class="form-label">Product Name</label>
+            <input type="text" name="product_name" class="form-control" value="{{ product.product_name }}" required>
+          </div>
+
+          <div class="col">
+            <label class="form-label">Category</label>
+            <select class="form-select" name="category" required>
+              {% for c in categories %}
+                <option value="{{ c.id }}" {% if product.category_id == c.id %}selected{% endif %}>
+                  {{ c.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col">
+            <label class="form-label">Unit</label>
+            <select name="unit" required class="form-select">
+              <option value="bag" {% if product.unit == "bag" %}selected{% endif %}>Bag</option>
+              <option value="piece" {% if product.unit == "piece" %}selected{% endif %}>Piece</option>
+              <option value="kg" {% if product.unit == "kg" %}selected{% endif %}>Kilogram</option>
+              <option value="sheet" {% if product.unit == "sheet" %}selected{% endif %}>Sheet</option>
+              <option value="roll" {% if product.unit == "roll" %}selected{% endif %}>Roll</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row my-4 g-3">
+          <div class="col">
+            <label class="form-label">Unit Cost (UGX)</label>
+            <input type="number" name="unit_cost" class="form-control" value="{{ product.unit_cost }}" step="0.01" min="0" required>
+          </div>
+
+          <div class="col">
+            <label class="form-label">Unit Price (UGX)</label>
+            <input type="number" name="unit_price" class="form-control" value="{{ product.unit_price }}" step="0.01" min="0" required>
+          </div>
+
+          <div class="col">
+            <label class="form-label">Reorder level</label>
+            <input type="number" name="reorder_level" class="form-control" value="{{ product.reorder_level }}" min="0" required>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3">
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+          <a href="{% url 'product_list' %}" class="btn btn-outline-danger">Cancel</a>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

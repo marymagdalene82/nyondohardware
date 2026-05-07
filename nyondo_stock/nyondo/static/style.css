@@ -4,6 +4,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: Verdana, Geneva, Tahoma, sans-serif;
+  background-color: #edf0ef;
 }
 
 /* Auth (mobile first) */
@@ -84,7 +85,7 @@ body {
 /* Manager dashboard shell (mobile first) */
 .sidebar-layout {
   margin-top: 0;
-  background: #f6f6f6;
+  background: #120908;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -94,7 +95,7 @@ body {
 }
 
 .sidebar-section-label {
-  color: #504e4c;
+  color: #d0cdc9;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 1.2px;
@@ -103,19 +104,19 @@ body {
 }
 
 .nav-link {
-  color: #504e4c;
+  color: #fff;
   padding: 10px;
   cursor: pointer;
 }
 
 .nav-item {
   margin-bottom: 12px;
-  background: #e7e7e5;
+  /* background: #e7e7e5; */
   border-radius: 8px;
 }
 
 .active {
-  background: #a6a29f;
+  background: #fff;
   color: #fff;
   border-radius: 8px;
 }
@@ -132,11 +133,21 @@ body {
 }
 
 .nav a:hover {
-  background: #a6a29f;
-  color: #fff;
+  background: #fff;
+  color: #000;
+  border-radius: 8px;
+}
+/* Active nav link */
+.nav-link.active {
+  background: #ffffff;
+  color: #000000 !important;
   border-radius: 8px;
 }
 
+/* Keep icon same color as text */
+.nav-link.active i {
+  color: #000000 !important;
+}
 .logout a {
   margin-top: 20px;
   margin-bottom: 20px;
@@ -162,7 +173,8 @@ body {
 }
 
 .topbar {
-  background: #f6f6f6;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border-radius: 9px;
   margin: 10px 3px 5px;
   padding: 10px 12px;
@@ -212,7 +224,7 @@ h6 {
 
 .main-manager-dashboard,
 .stock-list-main {
-  background: #f6f6f6;
+  /* background: #f6f6f6; */
   border-radius: 10px;
   margin: 0 3px;
   padding: 10px 12px;
@@ -280,14 +292,14 @@ h6 {
 }
 
 .form-container {
-  background: #f6f6f6;
+  /* background: #f6f6f6; */
   border-radius: 10px;
 }
 
 .form-area {
   background: #fff;
   padding: 16px;
-  border-radius: 19px;
+  border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin: auto;
   width: 80%;
@@ -576,7 +588,7 @@ h6 {
 
 /* === Header strip (like screenshot) === */
 .stock-table-head th {
-  background: #0c23bc; /* deep blue */
+  background: #0119b9; /* deep blue */
   color: #fff;
   font-weight: 700;
   font-size: 12px;
@@ -838,3 +850,87 @@ h6 {
     font-size: 24px;
   }
 }
+
+/* list filter styles */
+/* ===== Filters card (match table card) ===== */
+.stock-filter-card {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  border: 1px solid #eef2f7;
+}
+
+.stock-filter-header {
+  padding: 16px 18px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.stock-filter-header h6 {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.stock-filter-header small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.stock-filter-body {
+  padding: 18px;
+}
+
+/* Labels */
+.stock-filter-card .form-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+/* Inputs/selects */
+.stock-filter-card .form-control,
+.stock-filter-card .form-select {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fbfbfd;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  color: #0f172a;
+  box-shadow: none;
+}
+
+.stock-filter-card .form-control:focus,
+.stock-filter-card .form-select:focus {
+  border-color: #2d9cf0;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(45, 156, 240, 0.15);
+}
+
+/* Input group (search icon box) */
+.stock-filter-card .input-group-text {
+  border-radius: 12px 0 0 12px;
+  border: 1px solid #e2e8f0;
+  border-right: 0;
+  background: #fbfbfd;
+  color: #64748b;
+}
+
+.stock-filter-card .input-group .form-control {
+  border-radius: 0 12px 12px 0;
+}
+
+/* Filter button */
+/* .stock-filter-card .btn-primary-custom {
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 800;
+}
+.product-link{
+  color: #0d6efd;         
+  text-decoration: underline;
+}
+
+.product-link:hover{
+  color: #0a58ca;
+} */

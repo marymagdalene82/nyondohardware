@@ -18,20 +18,15 @@
                     <div class="col">
                         <label for="category" class="form-label">Category</label>
                         <select class="form-select" name="category">
-                            <option disabled selected>Select category</option>
-                            <option value="cement">Cement</option>
-                            <option value="iron_bars">Iron bars</option>
-                            <option value="nails">Nails</option>
-                            <option value="iron_sheets">Iron sheets</option>
-                            <option value="wheelbarrows">Wheelbarrows</option>
+                            <option value="">Select category</option>
+                              {% for c in categories %}
+                                <option value="{{ c.id }}">{{ c.name }}</option>
+                              {% endfor %}
+                            
                         </select>
                     </div>
 
-                    <div class="col">
-                        <label for="variant" class="form-label">Variant</label>
-                        <input type="text" name="variant" placeholder="e.g. CEM II N, 12mm, 3-inch nails"
-                            class="form-control" />
-                    </div>
+                   
                     <div class="col">
                         <label for="unit" class="form-label">Unit</label>
                         <select name="unit" required>
@@ -40,6 +35,7 @@
                             <option value="piece">Piece</option>
                             <option value="kg">Kilogram</option>
                             <option value="sheet">Sheet</option>
+                            <option value="roll">Roll</option>
                         </select>
                     </div>
                 </div>

@@ -1,3 +1,4 @@
+{% load static %}
 <!doctype html>
 <html lang="en">
 
@@ -10,7 +11,7 @@
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" />
 
-    <link rel="stylesheet" href="../static/style.css" />
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
 </head>
 
 <body>
@@ -27,30 +28,50 @@
                         <a class="nav-link" href="dashboard-storemanager.html"><i
                                 class="bi bi-speedometer"></i>Dashboard</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="bi bi-receipt-cutoff"></i>Sales Overview</a>
-                    </li>
+                   
                 </ul>
                 <div class="sidebar-section-label">STOCK MANAGEMENT</div>
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link" href="stock-register.html"><i class="bi bi-plus-circle"></i>Register
-                            Stock</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}" href="{% url 'product_list' %}"><i class="bi bi-plus-circle"></i>Stock</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="stock-list.html"><i class="bi bi-card-list"></i>Stock List</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'stock_entry_list' %}active{% endif %}" href="{% url 'stock_entry_list' %}"><i class="bi bi-card-list"></i>Stock Arrivals</a>
                     </li>
+                    
+                   
+                </ul>
+                <div class="sidebar-section-label">OPERATIONS</div>
+                <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link" href="transport-calculator.html"><i class="bi bi-truck"></i>Transport
-                            Calculator</a>
+                        <a class="nav-link" aria-current="page" href=""><i
+                                class="bi bi-building"></i>Sales</a>
+                    </li>
+                     <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href=""><i
+                                class="bi bi-building"></i>New Sale</a>
                     </li>
                 </ul>
-                <div class="sidebar-section-label">PEOPLE</div>
+
+                 <div class="sidebar-section-label">DEPOSIT SCHEME</div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="suppliers.html"><i
+                                class="bi bi-building"></i>Deposit Customer</a>
+                    </li>
+                    
+                </ul>
+                <div class="sidebar-section-label">FINANCE</div>
                 <ul class="nav flex-column">
                     <li class="nav-item">
                         <a class="nav-link" aria-current="page" href="suppliers.html"><i
                                 class="bi bi-building"></i>Suppliers</a>
                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="suppliers.html"><i
+                                class="bi bi-building"></i>Reports</a>
+                    </li>
+                    
                 </ul>
 
                 <div class="logout">
