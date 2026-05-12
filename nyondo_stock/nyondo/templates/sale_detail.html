@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h4 class="mb-0">Sale #{{ sale.pk }}</h4>
+      <small class="text-muted">{{ sale.sale_date|date:"d M Y, H:i" }}</small>
+    </div>
+    <a class="btn btn-outline-secondary" href="{% url 'sale_list' %}">Back</a>
+  </div>
+
+  <div class="card-custom stock-table-card mb-4">
+    <div class="card-custom-body stock-table-body">
+      <div class="row g-3">
+        <div class="col-md-4"><strong>Items Total:</strong> UGX {{ sale.total_amount|floatformat:0 }}</div>
+        <div class="col-md-4"><strong>Transport:</strong> UGX {{ sale.transport_charge|floatformat:0 }}</div>
+        <div class="col-md-4"><strong>Grand Total:</strong> UGX {{ sale.total_amount|floatformat:0 }}</div>
+      </div>
+    </div>
+  </div>
+
+  <h5>Items</h5>
+  <div class="card-custom stock-table-card">
+    <div class="card-custom-body stock-table-body">
+      <div class="table-responsive">
+        <table class="table table-custom stock-table">
+          <thead class="stock-table-head">
+            <tr>
+              <th>Product</th>
+              <th>Qty</th>
+              <th>Unit Price</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in sale.items.all %}
+            <tr>
+              <td>{{ i.product.product_name }}</td>
+              <td>{{ i.quantity }}</td>
+              <td>UGX {{ i.unit_price }}</td>
+              <td>UGX {{ i.subtotal|floatformat:0 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center py-4">No items.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

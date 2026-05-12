@@ -102,3 +102,53 @@ class StockEntry(models.Model):
 
     def __str__(self):
         return f"{self.product.product_name} - {self.quantity}"
+
+
+# Models for sale
+class Sale(models.Model):
+    CUSTOMER_TYPE = [
+        ("WHOLESALE", "Wholesaler"),
+        ("RETAIL", "Retailer"),
+        ("INDIVIDUAL", "Individual Buyer"),
+        ("SCHEME", "Deposit Scheme Earner"),
+    ]
+    customer_name = models.CharField(max_length=255, blank=True)
+    customer_type = models.CharField(max_length=20, choices=CUSTOMER_TYPE)
+    sale_date = models.DateTimeField(auto_now_add=True)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    distance_km = models.FloatField(default=0)
+    transport_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    # processed_by = models.ForeignKey(User, on_delete=models.PROTECT)
+    def calculate_transport(self):
+    # Free transport for 500k+ within 10km
+        if self.distance_km and self.distance_km <= 10 and self.total_amount >= Decimal("500000"):
+            return Decimal("0.00")
+        if self.distance_km and self.distance_km > 0:
+            return Decimal("30000.00")
+        return Decimal("0.00")
+
+
+class SaleItem(models.Model):
+    sale = models.ForeignKey(Sale, related_name="items", on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2)
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+
+        self.unit_price = self.product.unit_price
+        self.subtotal = self.quantity * self.unit_price
+
+        if is_new:
+            if self.product.stock < self.quantity:
+                raise ValidationError(
+                    f"Not enough stock for {self.product.product_name}"
+                )
+
+            self.product.stock -= self.quantity
+            self.product.save(update_fields=["stock"])
+
+        super().save(*args, **kwargs)

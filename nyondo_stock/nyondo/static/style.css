@@ -137,17 +137,7 @@ body {
   color: #000;
   border-radius: 8px;
 }
-/* Active nav link */
-.nav-link.active {
-  background: #ffffff;
-  color: #000000 !important;
-  border-radius: 8px;
-}
 
-/* Keep icon same color as text */
-.nav-link.active i {
-  color: #000000 !important;
-}
 .logout a {
   margin-top: 20px;
   margin-bottom: 20px;
@@ -918,6 +908,17 @@ h6 {
 
 .stock-filter-card .input-group .form-control {
   border-radius: 0 12px 12px 0;
+}
+/* Active nav link */
+.nav-link.active {
+  background: #ffffff;
+  color: #000000 !important;
+  border-radius: 8px;
+}
+
+/* Keep icon same color as text */
+.nav-link.active i {
+  color: #000000 !important;
 }
 
 /* Filter button */

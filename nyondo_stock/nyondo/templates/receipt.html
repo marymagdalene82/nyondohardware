@@ -1,0 +1,84 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Receipt - Sale #{{ sale.pk }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; color: #111; }
+    .receipt { max-width: 380px; margin: 0 auto; }
+    h2, h3 { margin: 0; text-align: center; }
+    .muted { color: #666; font-size: 12px; text-align: center; margin-top: 4px; }
+    hr { border: 0; border-top: 1px dashed #aaa; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { padding: 6px 0; }
+    th { text-align: left; }
+    td:last-child, th:last-child { text-align: right; }
+    .totals td { padding-top: 6px; }
+    .print-btn { margin: 16px auto; display: block; }
+    @media print {
+      .print-btn { display: none; }
+      body { margin: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="receipt">
+    <h2>NYONDO HARDWARE</h2>
+    <div class="muted">Receipt</div>
+    <div class="muted">Sale #{{ sale.pk }} • {{ sale.sale_date|date:"d M Y, H:i" }}</div>
+    <hr>
+
+    <div style="font-size:12px;">
+      <div><strong>Customer:</strong>
+        {% if sale.customer_name %}{{ sale.customer_name }}{% else %}Walk-in Customer{% endif %}
+      </div>
+      <div><strong>Type:</strong> {{ sale.get_customer_type_display }}</div>
+      <div><strong>Distance:</strong> {{ sale.distance_km }} km</div>
+    </div>
+
+    <hr>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Qty</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in sale.items.all %}
+        <tr>
+          <td>{{ item.product.product_name }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>UGX {{ item.subtotal|floatformat:0 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <hr>
+
+    <table class="totals">
+      <tr>
+        <td><strong>Items Total</strong></td>
+        <td style="text-align:right;"><strong>UGX {{ sale.total_amount|floatformat:0 }}</strong></td>
+      </tr>
+      <tr>
+        <td>Transport</td>
+        <td style="text-align:right;">UGX {{ sale.transport_charge|floatformat:0 }}</td>
+      </tr>
+      <tr>
+        <td><strong>Grand Total</strong></td>
+        <td style="text-align:right;"><strong>UGX {{ sale.total_amount|floatformat:0 }}</strong></td>
+      </tr>
+    </table>
+
+    <hr>
+    <div class="muted">Thank you for shopping with us.</div>
+
+    <button class="print-btn" onclick="window.print()">Print</button>
+  </div>
+</body>
+</html>

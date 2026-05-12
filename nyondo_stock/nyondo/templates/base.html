@@ -25,7 +25,7 @@
                 <div class="sidebar-section-label">MAIN</div>
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link" href="dashboard-storemanager.html"><i
+                        <a class="nav-link" href=""><i
                                 class="bi bi-speedometer"></i>Dashboard</a>
                     </li>
                    
@@ -44,11 +44,11 @@
                 <div class="sidebar-section-label">OPERATIONS</div>
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href=""><i
+                        <a class="nav-link {% if request.resolver_match.url_name == 'sale_list' %}active{% endif %}" aria-current="page" href="{% url 'sale_list' %}"><i
                                 class="bi bi-building"></i>Sales</a>
                     </li>
                      <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href=""><i
+                        <a class="nav-link {% if request.resolver_match.url_name == 'sale_create' %}active{% endif %}" aria-current="page" href="{% url 'sale_create' %}"><i
                                 class="bi bi-building"></i>New Sale</a>
                     </li>
                 </ul>

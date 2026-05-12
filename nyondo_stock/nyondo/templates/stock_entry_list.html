@@ -1,7 +1,7 @@
 {% extends 'base.html' %} {% block content %}
 <div class="d-flex justify-content-between list-header align-items-center mb-4 mt-4">
     <div>
-        <h4>Stock Arrival List</h4>
+        
     </div>
 
     <div class="d-flex gap-2 justify-content-end shortcuts">
@@ -25,13 +25,13 @@
             <table class="table table-custom stock-table">
                 <thead class="stock-table-head">
                     <tr>
-                        <th>Date</th>
+                        <!-- <th>Date</th> -->
                         <th>Product</th>
                         <th>Supplier</th>
                         <th>Quantity</th>
                         <th>Unit Cost</th>
                         <th>Total Value</th>
-                        <th>On Credit</th>
+                        <th>Status</th>
                         <th>Balance Due</th>
                         <th class="text-end">Actions</th>
                     </tr>
@@ -40,12 +40,12 @@
                 <tbody>
                     {% for entry in entries %}
                     <tr class="stock-row">
-                        <td>{{ entry.created_at|date:"F j" }}</td>
+                        <!-- <td>{{ entry.created_at|date:"F j" }}</td> -->
 
                         <td>
-                            <a href="#" class="product-link fw-semibold">
+                           
                                 {{ entry.product.product_name }}
-                            </a>
+                            
                             {% if entry.product.variant %}
                             <div class="text-muted small">{{ entry.product.variant }}</div>
                             {% endif %}

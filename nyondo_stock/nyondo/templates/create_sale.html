@@ -1,0 +1,174 @@
+{% extends 'base.html' %} {% block content %}
+
+<div class="container-fluid form-container">
+  <div class="row justify-content-center stock-register-layout">
+    <div class="col form-area">
+      <div class="container form-wrapper">
+        <!-- Page Header -->
+        <div class="page-title mb-4">
+          <h3>New Sale</h3>
+          <p>Record customer purchases and sold items</p>
+        </div>
+
+        <!-- Card -->
+        <div class="card-custom">
+          <form method="POST" action="{% url 'sale_create' %}">
+            {% csrf_token %}
+
+            <!-- CUSTOMER DETAILS -->
+            <div class="section-title mb-4">Customer Information</div>
+
+            <div class="row g-4 mb-5">
+              <!-- Customer Name -->
+              <div class="col-md-4">
+                <label class="form-label">Customer Name</label>
+
+                <input
+                  type="text"
+                  name="customer_name"
+                  class="form-control"
+                  placeholder="Enter customer name"
+                />
+              </div>
+
+              <!-- Customer Type -->
+              <div class="col-md-4">
+                <label class="form-label">Customer Type</label>
+
+                <select name="customer_type" class="form-select" required>
+                  <option value="">Select customer type</option>
+
+                  <option value="WHOLESALE">Wholesaler</option>
+
+                  <option value="RETAIL">Retailer</option>
+
+                  <option value="INDIVIDUAL">Individual Buyer</option>
+
+                  <option value="SCHEME">Deposit Scheme Earner</option>
+                </select>
+              </div>
+
+              <!-- Distance -->
+              <div class="col-md-4">
+                <label class="form-label"> Delivery Distance (KM) </label>
+
+                <input
+                  type="number"
+                  step="0.1"
+                  name="distance_km"
+                  class="form-control"
+                  placeholder="Enter distance"
+                />
+              </div>
+            </div>
+
+            <!-- PRODUCTS SECTION -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="section-title">Sale Items</div>
+
+              <button type="button" id="add-row" class="btn btn-warning">
+                <i class="bi bi-plus-lg"></i>
+                Add Product
+              </button>
+            </div>
+
+            <!-- ITEMS CONTAINER -->
+            <div id="sale-items">
+              <!-- SINGLE ITEM ROW -->
+              <div class="sale-item card-custom mb-4 p-3">
+                <div class="row g-4 align-items-end">
+                  <!-- Product -->
+                  <div class="col-md-5">
+                    <label class="form-label"> Product </label>
+
+                    <select name="product[]" class="form-select" required>
+                      <option value="">Select Product</option>
+
+                      {% for product in products %}
+                      <option value="{{ product.id }}">
+                        {{ product.product_name }} - Stock: {{ product.stock }}
+                      </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+
+                  <!-- Quantity -->
+                  <div class="col-md-3">
+                    <label class="form-label"> Quantity </label>
+
+                    <input
+                      type="number"
+                      name="quantity[]"
+                      class="form-control"
+                      placeholder="Enter quantity"
+                      min="1"
+                      required
+                    />
+                  </div>
+
+                  <!-- Remove Button -->
+                  <div class="col-md-2">
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger btn-sm remove-row  w-200 "
+                    >
+                      <i class="bi bi-trash"></i>
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="d-flex justify-content-center gap-3 mt-5">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i>
+                Save Sale
+              </button>
+
+              <button type="reset" class="btn btn-outline-danger">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JAVASCRIPT -->
+<script>
+  const addRowBtn = document.getElementById("add-row");
+
+  const saleItemsContainer = document.getElementById("sale-items");
+
+  addRowBtn.addEventListener("click", function () {
+    const firstRow = document.querySelector(".sale-item");
+
+    const newRow = firstRow.cloneNode(true);
+
+    // clear quantity
+    newRow.querySelector('input[name="quantity[]"]').value = "";
+
+    // reset product select
+    newRow.querySelector('select[name="product[]"]').selectedIndex = 0;
+
+    saleItemsContainer.appendChild(newRow);
+  });
+
+  // remove row
+  document.addEventListener("click", function (e) {
+    if (e.target.closest(".remove-row")) {
+      const rows = document.querySelectorAll(".sale-item");
+
+      // prevent deleting last row
+      if (rows.length > 1) {
+        e.target.closest(".sale-item").remove();
+      }
+    }
+  });
+</script>
+
+{% endblock %}

@@ -34,5 +34,9 @@ urlpatterns = [
     path("products/<int:pk>/edit/", web_views.product_edit, name="product_edit"),
     path("stock/<int:pk>/", web_views.stock_entry_detail, name="stock_entry_detail"),
     path("stock/<int:pk>/pay/", web_views.stock_entry_pay, name="stock_entry_pay"),
-    
+    # Paths for sales
+    path("sales/", web_views.sale_list, name="sale_list"),
+    path("sales/create/", web_views.sale_create, name="sale_create"),
+    path("sales/<int:pk>/", web_views.sale_detail, name="sale_detail"),
+    path("sales/<int:pk>/receipt/", web_views.sale_receipt, name="sale_receipt"),
 ]

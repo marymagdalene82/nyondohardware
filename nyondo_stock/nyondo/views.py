@@ -1,10 +1,11 @@
 from urllib import request
 
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import Product, Category, StockEntry, Supplier
+from .models import Product, Category, StockEntry, Supplier, Sale, SaleItem
 from django.contrib import messages
 from decimal import Decimal
 from django.db import transaction
+from django.core.exceptions import ValidationError
 
 
 # Create your views here.
@@ -102,6 +103,7 @@ def stock_entry_list(request):
         {"entries": entries, "credit_only": credit_only},
     )
 
+
 # View to edit product details
 def product_edit(request, pk):
     product = get_object_or_404(Product, pk=pk)
@@ -143,7 +145,10 @@ def product_edit(request, pk):
             return redirect("product_list")
 
     categories = Category.objects.all().order_by("name")
-    return render(request, "product_edit.html", {"product": product, "categories": categories})
+    return render(
+        request, "product_edit.html", {"product": product, "categories": categories}
+    )
+
 
 # View to delete a product
 def product_delete(request, pk):
@@ -156,8 +161,10 @@ def product_delete(request, pk):
 
     return render(request, "product_confirm_delete.html", {"product": product})
 
+
 # View to display product details
 from django.shortcuts import get_object_or_404
+
 
 def product_detail(request, pk):
     product = get_object_or_404(Product.objects.select_related("category"), pk=pk)
@@ -175,19 +182,19 @@ def product_detail(request, pk):
         {"product": product, "recent_entries": recent_entries},
     )
 
+
 # View to display stock entry details
 def stock_entry_detail(request, pk):
     entry = get_object_or_404(
-        StockEntry.objects.select_related("product", "supplier"),
-        pk=pk
+        StockEntry.objects.select_related("product", "supplier"), pk=pk
     )
     return render(request, "stock_entry_detail.html", {"entry": entry})
+
 
 # View to handle payments for credit stock entries
 def stock_entry_pay(request, pk):
     entry = get_object_or_404(
-        StockEntry.objects.select_related("product", "supplier"),
-        pk=pk
+        StockEntry.objects.select_related("product", "supplier"), pk=pk
     )
 
     if request.method == "POST":
@@ -221,3 +228,100 @@ def stock_entry_pay(request, pk):
         return redirect("stock_entry_list")
 
     return render(request, "stock_entry_pay.html", {"entry": entry})
+
+
+# Views for sales management
+def sale_list(request):
+    sales = Sale.objects.prefetch_related("items").all().order_by("-sale_date")
+    context = {"sales": sales}
+    return render(request, "sale_list.html", context)
+
+
+def sale_detail(request, pk):
+    sale = get_object_or_404(Sale.objects.prefetch_related("items__product"), pk=pk)
+    return render(request, "sale_detail.html", {"sale": sale})
+
+
+def sale_create(request):
+    if request.method == "POST":
+        customer_name = (request.POST.get("customer_name") or "").strip()
+        customer_type = request.POST.get("customer_type")
+        distance_km = Decimal(request.POST.get("distance_km") or "0")
+
+        products = request.POST.getlist("product[]")
+        quantities = request.POST.getlist("quantity[]")
+
+        # Basic validation
+        if not customer_type:
+            messages.error(request, "Customer type is required.")
+            return redirect("sale_create")
+
+        if not products or not quantities or len(products) != len(quantities):
+            messages.error(request, "Please add at least one product with quantity.")
+            return redirect("sale_create")
+
+        with transaction.atomic():
+            sale = Sale.objects.create(
+                customer_name=customer_name,
+                customer_type=customer_type,
+                distance_km=float(distance_km),
+                total_amount=Decimal("0.00"),
+                transport_charge=Decimal("0.00"),
+            )
+
+            items_total = Decimal("0.00")
+
+            for product_id, qty in zip(products, quantities):
+                if not product_id:
+                    continue
+
+                try:
+                    quantity = int(qty)
+                except:
+                    raise ValidationError("Quantity must be a whole number.")
+
+                if quantity <= 0:
+                    raise ValidationError("Quantity must be greater than 0.")
+
+                product = get_object_or_404(Product, pk=product_id)
+
+                # stock check
+                if product.stock < quantity:
+                    raise ValidationError(
+                        f"Not enough stock for {product.product_name}. Available: {product.stock}"
+                    )
+
+                unit_price = product.unit_price
+                subtotal = Decimal(quantity) * unit_price
+
+                SaleItem.objects.create(
+                    sale=sale,
+                    product=product,
+                    quantity=quantity,
+                    unit_price=unit_price,
+                    subtotal=subtotal,
+                )
+
+                # reduce stock (do it here or rely on SaleItem.save; choose ONE)
+                Product.objects.filter(pk=product.pk).update(
+                    stock=product.stock - quantity
+                )
+
+                items_total += subtotal
+
+            # compute transport based on items_total
+            sale.total_amount = items_total
+            sale.transport_charge = sale.calculate_transport()
+            sale.total_amount = sale.total_amount + sale.transport_charge
+            sale.save(update_fields=["total_amount", "transport_charge"])
+
+        messages.success(request, "Sale created successfully!")
+        return redirect("sale_detail", pk=sale.pk)
+
+    products = Product.objects.all().order_by("product_name")
+    return render(request, "create_sale.html", {"products": products})
+
+
+def sale_receipt(request, pk):
+    sale = get_object_or_404(Sale.objects.prefetch_related("items__product"), pk=pk)
+    return render(request, "receipt.html", {"sale": sale})

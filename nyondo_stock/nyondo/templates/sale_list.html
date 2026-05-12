@@ -1,0 +1,90 @@
+{% extends "base.html" %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+  <h4>Sales</h4>
+  <a href="{% url 'sale_create' %}" class="btn btn-warning">
+    <i class="bi bi-plus-lg me-1"></i>New Sale
+  </a>
+</div>
+
+<div class="card-custom stock-table-card">
+  <div class="card-custom-body stock-table-body">
+    <div class="table-responsive">
+      <table class="table table-custom stock-table">
+        <thead class="stock-table-head">
+          <tr>
+      <th>Date</th>
+      <th>Customer</th>
+      <th>Customer Type</th>
+      <th>Items</th>
+      <th>Transport</th>
+      <th>Grand Total</th>
+      <th class="text-end">Actions</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for sale in sales %}
+    <tr class="stock-row">
+      <td>{{ sale.sale_date|date:"F j" }}</td>
+
+      <td class="fw-semibold">
+        {% if sale.customer_name %}
+          {{ sale.customer_name }}
+        {% else %}
+          Walk-in Customer
+        {% endif %}
+      </td>
+
+      <td>{{ sale.get_customer_type_display }}</td>
+
+      <td>
+        <ul class="list-unstyled mb-0">
+          {% for item in sale.items.all %}
+          <li>
+            {{ item.product.product_name }} — {{ item.quantity }} × UGX {{ item.unit_price }}
+          </li>
+          {% endfor %}
+        </ul>
+      </td>
+
+      <td>
+        {% if sale.transport_charge > 0 %}
+          UGX {{ sale.transport_charge|floatformat:0 }}
+        {% else %}
+          <span class="badge bg-success">Free</span>
+        {% endif %}
+      </td>
+
+      <td class="fw-bold">UGX {{ sale.total_amount|floatformat:0 }}</td>
+
+      <td class="text-end">
+        <div class="d-inline-flex gap-1">
+          <a href="{% url 'sale_detail' sale.pk %}" class="btn btn-sm btn-outline-primary" title="View">
+            <i class="bi bi-eye"></i>
+          </a>
+
+          <a href="{% url 'sale_receipt' sale.pk %}" target="_blank"
+             class="btn btn-sm btn-outline-dark" title="Print Receipt">
+            <i class="bi bi-printer"></i>
+          </a>
+
+          {% comment %} {# optional delete later #}
+          {# <a href="{% url 'sale_delete' sale.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+            <i class="bi bi-trash"></i>
+          </a> #} {% endcomment %}
+        </div>
+      </td>
+    </tr>
+
+    {% empty %}
+    <tr>
+      <td colspan="7" class="text-center py-4">No sales recorded yet.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
