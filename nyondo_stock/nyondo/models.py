@@ -1,9 +1,11 @@
 from django.db import models
 from decimal import Decimal
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 
 
 # Create your models here.
+
 # Category model
 class Category(models.Model):
     name = models.CharField(max_length=255)
@@ -154,4 +156,74 @@ class SaleItem(models.Model):
         super().save(*args, **kwargs)
 
 # Deposit Scheme model
+class DepositCustomer(models.Model):
+    depost_customer_name = models.CharField(max_length=255)
+    nin = models.CharField(max_length=255)
+    phone = models.CharField(max_length=15)
+    address = models.CharField(max_length=255)
+    occupation = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.full_name} ({self.nin})" 
+
+    @property
+    def balance(self):
+        # Deposits increase balance, pickups decrease it.
+        deposits = (
+            self.transactions.filter(tx_type="DEPOSIT")
+            .aggregate(models.Sum("amount"))
+            .get("amount__sum")
+            or Decimal("0.00")
+        )
+        pickups = (
+            self.transactions.filter(tx_type="PICKUP")
+            .aggregate(models.Sum("amount"))
+            .get("amount__sum")
+            or Decimal("0.00")
+        )
+        return deposits - pickups
+    
+class DepositTransaction(models.Model):
+    TX_TYPE_CHOICES = [
+        ("DEPOSIT", "Deposit"),
+        ("PICKUP", "Pickup"),
+    ]
+    customer = models.ForeignKey(DepositCustomer, related_name="transactions", on_delete=models.CASCADE)
+    tx_type = models.CharField(max_length=10, choices=TX_TYPE_CHOICES)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    notes = models.CharField(max_length=255, blank=True)
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.tx_type} of {self.amount} for {self.customer.depost_customer_name}"
+    
+class DepositPickup(models.Model):
+    customer = models.ForeignKey(DepositCustomer, on_delete=models.PROTECT, related_name="pickups")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def total(self):
+        return sum((i.total for i in self.items.all()), Decimal("0.00"))
+
+    def __str__(self):
+        return f"Pickup #{self.pk} - {self.customer.full_name}"
+
+
+class DepositPickupItem(models.Model):
+    pickup = models.ForeignKey(DepositPickup, on_delete=models.CASCADE, related_name="items")
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2)
+
+    @property
+    def total(self):
+        return Decimal(self.quantity) * self.unit_price
+
+    def clean(self):
+        # enforce deposit eligibility (category)
+        if not self.product.category.is_deposit_allowed:
+            raise ValidationError("This product is not eligible for the deposit scheme.")
+   
+
 
