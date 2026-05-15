@@ -1,4 +1,5 @@
 {% extends "base.html" %} {% block content %}
+{% load humanize %}
 <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
   <h4>Sales</h4>
   <a href="{% url 'sale_create' %}" class="btn btn-warning">

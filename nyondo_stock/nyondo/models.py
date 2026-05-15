@@ -152,3 +152,6 @@ class SaleItem(models.Model):
             self.product.save(update_fields=["stock"])
 
         super().save(*args, **kwargs)
+
+# Deposit Scheme model
+
