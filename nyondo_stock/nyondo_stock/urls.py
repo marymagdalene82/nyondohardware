@@ -39,4 +39,40 @@ urlpatterns = [
     path("sales/create/", web_views.sale_create, name="sale_create"),
     path("sales/<int:pk>/", web_views.sale_detail, name="sale_detail"),
     path("sales/<int:pk>/receipt/", web_views.sale_receipt, name="sale_receipt"),
+    # Paths for deposits
+    path(
+        "deposits/customers/",
+        web_views.deposit_customer_list,
+        name="deposit_customer_list",
+    ),
+    path(
+        "deposits/customers/new/",
+        web_views.deposit_customer_create,
+        name="deposit_customer_create",
+    ),
+    path(
+        "deposits/customers/<int:pk>/",
+        web_views.deposit_customer_detail,
+        name="deposit_customer_detail",
+    ),
+    path(
+        "deposits/customers/<int:pk>/deposit/",
+        web_views.deposit_make,
+        name="deposit_make",
+    ),
+    path(
+        "deposits/transactions/<int:pk>/receipt/",
+        web_views.deposit_receipt,
+        name="deposit_receipt",
+    ),
+    path(
+        "deposits/customers/<int:pk>/pickup/",
+        web_views.deposit_pickup_create,
+        name="deposit_pickup_create",
+    ),
+    path(
+        "deposits/pickups/<int:pk>/receipt/",
+        web_views.deposit_pickup_receipt,
+        name="deposit_pickup_receipt",
+    ),
 ]

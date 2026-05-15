@@ -1,7 +1,6 @@
 from urllib import request
-
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import Product, Category, StockEntry, Supplier, Sale, SaleItem
+from .models import Product, Category, StockEntry, Supplier, Sale, SaleItem,DepositCustomer, DepositTransaction, DepositPickup, DepositPickupItem
 from django.contrib import messages
 from decimal import Decimal
 from django.db import transaction
@@ -303,9 +302,9 @@ def sale_create(request):
                 )
 
                 # reduce stock (do it here or rely on SaleItem.save; choose ONE)
-                Product.objects.filter(pk=product.pk).update(
-                    stock=product.stock - quantity
-                )
+                # Product.objects.filter(pk=product.pk).update(
+                #     stock=product.stock - quantity
+                # )
 
                 items_total += subtotal
 
