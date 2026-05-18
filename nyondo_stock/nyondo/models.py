@@ -157,11 +157,12 @@ class SaleItem(models.Model):
 
 # Deposit Scheme model
 class DepositCustomer(models.Model):
-    depost_customer_name = models.CharField(max_length=255)
+    full_name = models.CharField(max_length=255)
     nin = models.CharField(max_length=255)
     phone = models.CharField(max_length=15)
     address = models.CharField(max_length=255)
     occupation = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.full_name} ({self.nin})" 
@@ -192,10 +193,10 @@ class DepositTransaction(models.Model):
     tx_type = models.CharField(max_length=10, choices=TX_TYPE_CHOICES)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     notes = models.CharField(max_length=255, blank=True)
-    date = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.tx_type} of {self.amount} for {self.customer.depost_customer_name}"
+        return f"{self.tx_type} of {self.amount} for {self.customer.full_name}"
     
 class DepositPickup(models.Model):
     customer = models.ForeignKey(DepositCustomer, on_delete=models.PROTECT, related_name="pickups")

@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Deposit Receipt #{{ tx.pk }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; color: #111; }
+    .receipt { max-width: 380px; margin: 0 auto; }
+    h2 { margin: 0; text-align: center; }
+    .muted { color: #666; font-size: 12px; text-align: center; margin-top: 4px; }
+    hr { border: 0; border-top: 1px dashed #aaa; margin: 12px 0; }
+    .row { display:flex; justify-content:space-between; font-size: 12px; margin: 6px 0; }
+    .print-btn { margin: 16px auto; display: block; }
+    @media print { .print-btn { display:none; } body { margin:0; } }
+  </style>
+</head>
+<body>
+  <div class="receipt">
+    <h2>NYONDO HARDWARE</h2>
+    <div class="muted">Temporary Deposit Receipt</div>
+    <div class="muted">Receipt #{{ tx.pk }} • {{ tx.created_at|date:"d M Y, H:i" }}</div>
+    <hr>
+
+    <div class="row"><div><strong>Customer:</strong></div><div>{{ tx.customer.full_name }}</div></div>
+    <div class="row"><div><strong>NIN:</strong></div><div>{{ tx.customer.nin }}</div></div>
+    <div class="row"><div><strong>Phone:</strong></div><div>{{ tx.customer.phone }}</div></div>
+
+    <hr>
+    <div class="row"><div><strong>Deposit Amount:</strong></div><div><strong>UGX {{ tx.amount|floatformat:0 }}</strong></div></div>
+    <div class="row"><div><strong>Notes:</strong></div><div>{{ tx.notes|default:"-" }}</div></div>
+    <hr>
+    <div class="muted">Keep this receipt for reference.</div>
+
+    <button class="print-btn" onclick="window.print()">Print</button>
+  </div>
+</body>
+</html>

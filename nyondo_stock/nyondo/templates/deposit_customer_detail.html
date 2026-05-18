@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h4 class="mb-0">{{ customer.full_name }}</h4>
+      <small class="text-muted">{{ customer.nin }} • {{ customer.phone }}</small>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-warning" href="{% url 'deposit_make' customer.pk %}">
+        <i class="bi bi-cash"></i> Deposit
+      </a>
+      <a class="btn btn-outline-primary" href="{% url 'deposit_pickup_create' customer.pk %}">
+        <i class="bi bi-box-seam"></i> Pickup Goods
+      </a>
+      <a class="btn btn-outline-secondary" href="{% url 'deposit_customer_list' %}">Back</a>
+    </div>
+  </div>
+
+  <div class="card-custom stock-table-card mb-4">
+    <div class="card-custom-body stock-table-body">
+      <div class="row g-3">
+        <div class="col-md-4"><strong>Balance:</strong> UGX {{ customer.balance|floatformat:0 }}</div>
+        <div class="col-md-4"><strong>Occupation:</strong> {{ customer.occupation|default:"-" }}</div>
+        <div class="col-md-4"><strong>Address:</strong> {{ customer.address|default:"-" }}</div>
+      </div>
+    </div>
+  </div>
+
+  <h5 class="mb-2">Recent Transactions</h5>
+  <div class="card-custom stock-table-card mb-4">
+    <div class="card-custom-body stock-table-body">
+      <div class="table-responsive">
+        <table class="table table-custom stock-table">
+          <thead class="stock-table-head">
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in transactions %}
+            <tr>
+              <td>{{ t.created_at|date:"d M Y" }}</td>
+              <td>{{ t.get_tx_type_display }}</td>
+              <td>UGX {{ t.amount|floatformat:0 }}</td>
+              <td>{{ t.notes }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center py-4">No transactions yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <h5 class="mb-2">Recent Pickups</h5>
+  <div class="card-custom stock-table-card">
+    <div class="card-custom-body stock-table-body">
+      <div class="table-responsive">
+        <table class="table table-custom stock-table">
+          <thead class="stock-table-head">
+            <tr>
+              <th>Date</th>
+              <th>Total Deducted</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in pickups %}
+            <tr>
+              <td>{{ p.created_at|date:"d M Y" }}</td>
+              <td>UGX {{ p.total|floatformat:0 }}</td>
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-dark" target="_blank"
+                   href="{% url 'deposit_pickup_receipt' p.pk %}">
+                  <i class="bi bi-printer"></i>
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" class="text-center py-4">No pickups yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

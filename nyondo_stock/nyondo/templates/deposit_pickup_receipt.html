@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Pickup Receipt #{{ pickup.pk }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; color: #111; }
+    .receipt { max-width: 420px; margin: 0 auto; }
+    h2 { margin: 0; text-align: center; }
+    .muted { color: #666; font-size: 12px; text-align: center; margin-top: 4px; }
+    hr { border: 0; border-top: 1px dashed #aaa; margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { padding: 6px 0; }
+    th { text-align: left; }
+    td:last-child, th:last-child { text-align: right; }
+    .print-btn { margin: 16px auto; display: block; }
+    @media print { .print-btn { display:none; } body { margin:0; } }
+  </style>
+</head>
+<body>
+  <div class="receipt">
+    <h2>NYONDO HARDWARE</h2>
+    <div class="muted">Deposit Pickup Receipt</div>
+    <div class="muted">Pickup #{{ pickup.pk }} • {{ pickup.created_at|date:"d M Y, H:i" }}</div>
+    <hr>
+
+    <div style="font-size:12px;">
+      <div><strong>Customer:</strong> {{ pickup.customer.full_name }}</div>
+      <div><strong>NIN:</strong> {{ pickup.customer.nin }}</div>
+      <div><strong>Phone:</strong> {{ pickup.customer.phone }}</div>
+    </div>
+
+    <hr>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Qty</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in pickup.items.all %}
+        <tr>
+          <td>{{ i.product.product_name }}</td>
+          <td>{{ i.quantity }}</td>
+          <td>UGX {{ i.total|floatformat:0 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <hr>
+    <div style="display:flex; justify-content:space-between; font-size:12px;">
+      <div><strong>Total Deducted</strong></div>
+      <div><strong>UGX {{ pickup.total|floatformat:0 }}</strong></div>
+    </div>
+
+    <button class="print-btn" onclick="window.print()">Print</button>
+  </div>
+</body>
+</html>

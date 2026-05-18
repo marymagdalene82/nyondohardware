@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .models import Product, Category, StockEntry, Supplier, Sale, SaleItem,DepositCustomer, DepositTransaction, DepositPickup, DepositPickupItem
 from django.contrib import messages
 from decimal import Decimal
-from django.db import transaction
+from django.db import transaction, models
 from django.core.exceptions import ValidationError
 
 
@@ -297,8 +297,8 @@ def sale_create(request):
                     sale=sale,
                     product=product,
                     quantity=quantity,
-                    unit_price=unit_price,
-                    subtotal=subtotal,
+                    # unit_price=unit_price,
+                    # subtotal=subtotal,
                 )
 
                 # reduce stock (do it here or rely on SaleItem.save; choose ONE)
@@ -324,3 +324,176 @@ def sale_create(request):
 def sale_receipt(request, pk):
     sale = get_object_or_404(Sale.objects.prefetch_related("items__product"), pk=pk)
     return render(request, "receipt.html", {"sale": sale})
+
+# Views for deposit management
+def deposit_customer_list(request):
+    q = (request.GET.get("q") or "").strip()
+    customers = DepositCustomer.objects.all().order_by("-id")
+    if q:
+        customers = customers.filter(
+            models.Q(full_name__icontains=q) |
+            models.Q(nin__icontains=q) |
+            models.Q(phone__icontains=q)
+        )
+    return render(request, "deposit_customer_list.html", {"customers": customers, "q": q})
+
+
+def deposit_customer_create(request):
+    if request.method == "POST":
+        full_name = (request.POST.get("full_name") or "").strip()
+        nin = (request.POST.get("nin") or "").strip().upper()
+        phone = (request.POST.get("phone") or "").strip()
+        address = (request.POST.get("address") or "").strip()
+        occupation = (request.POST.get("occupation") or "").strip()
+
+        if not full_name or not nin or not phone:
+            messages.error(request, "Full name, NIN and phone are required.")
+            return redirect("deposit_customer_create")
+
+        try:
+            customer = DepositCustomer.objects.create(
+                full_name=full_name,
+                nin=nin,
+                phone=phone,
+                address=address,
+                occupation=occupation,
+            )
+            messages.success(request, "Deposit customer registered.")
+            return redirect("deposit_customer_detail", pk=customer.pk)
+        except Exception as e:
+            messages.error(request, f"Could not register customer: {e}")
+            return redirect("deposit_customer_create")
+
+    return render(request, "deposit_customer_form.html")
+
+
+def deposit_customer_detail(request, pk):
+    customer = get_object_or_404(DepositCustomer, pk=pk)
+    transactions = customer.transactions.order_by("-created_at")[:20]
+    pickups = customer.pickups.order_by("-created_at")[:10]
+    return render(
+        request,
+        "deposit_customer_detail.html",
+        {"customer": customer, "transactions": transactions, "pickups": pickups},
+    )
+
+
+def deposit_make(request, pk):
+    customer = get_object_or_404(DepositCustomer, pk=pk)
+
+    if request.method == "POST":
+        try:
+            amount = Decimal(request.POST.get("amount") or "0")
+        except:
+            messages.error(request, "Enter a valid amount.")
+            return redirect("deposit_make", pk=pk)
+
+        notes = (request.POST.get("notes") or "").strip()
+
+        if amount <= 0:
+            messages.error(request, "Deposit amount must be greater than 0.")
+            return redirect("deposit_make", pk=pk)
+
+        tx = DepositTransaction.objects.create(
+            customer=customer,
+            tx_type="DEPOSIT",
+            amount=amount,
+            notes=notes,
+        )
+
+        messages.success(request, "Deposit recorded.")
+        return redirect("deposit_receipt", pk=tx.pk)
+
+    return render(request, "deposit_make.html", {"customer": customer})
+
+
+def deposit_receipt(request, pk):
+    tx = get_object_or_404(
+        DepositTransaction.objects.select_related("customer"),
+        pk=pk,
+        tx_type="DEPOSIT",
+    )
+    return render(request, "deposit_receipt.html", {"tx": tx})
+
+
+def deposit_pickup_create(request, pk):
+    customer = get_object_or_404(DepositCustomer, pk=pk)
+    eligible_products = Product.objects.select_related("category").filter(
+        category__is_deposit_allowed=True
+    ).order_by("product_name")
+
+    if request.method == "POST":
+        product_id = request.POST.get("product")
+        qty_raw = request.POST.get("quantity") or "0"
+
+        if not product_id:
+            messages.error(request, "Select a product.")
+            return redirect("deposit_pickup_create", pk=pk)
+
+        try:
+            quantity = int(qty_raw)
+        except:
+            messages.error(request, "Enter a valid quantity.")
+            return redirect("deposit_pickup_create", pk=pk)
+
+        if quantity <= 0:
+            messages.error(request, "Quantity must be greater than 0.")
+            return redirect("deposit_pickup_create", pk=pk)
+
+        product = get_object_or_404(Product.objects.select_related("category"), pk=product_id)
+
+        if not product.category.is_deposit_allowed:
+            messages.error(request, "This product is not eligible for deposit scheme.")
+            return redirect("deposit_pickup_create", pk=pk)
+
+        if product.stock < quantity:
+            messages.error(request, f"Not enough stock. Available: {product.stock}")
+            return redirect("deposit_pickup_create", pk=pk)
+
+        unit_price = product.unit_price  # rule #2: current price
+        total_cost = Decimal(quantity) * unit_price
+
+        if customer.balance < total_cost:
+            messages.error(
+                request,
+                f"Insufficient deposit balance. Balance: UGX {customer.balance}. Required: UGX {total_cost}."
+            )
+            return redirect("deposit_pickup_create", pk=pk)
+
+        with transaction.atomic():
+            pickup = DepositPickup.objects.create(customer=customer)
+            item = DepositPickupItem.objects.create(
+                pickup=pickup,
+                product=product,
+                quantity=quantity,
+                unit_price=unit_price,
+            )
+
+            # reduce stock
+            Product.objects.filter(pk=product.pk).update(stock=product.stock - quantity)
+
+            # ledger deduction (always positive amount)
+            DepositTransaction.objects.create(
+                customer=customer,
+                tx_type="PICKUP",
+                amount=total_cost,
+                notes=f"Pickup #{pickup.pk}",
+                related_pickup=pickup,
+            )
+
+        messages.success(request, "Pickup recorded.")
+        return redirect("deposit_pickup_receipt", pk=pickup.pk)
+
+    return render(
+        request,
+        "deposit_pickup_form.html",
+        {"customer": customer, "products": eligible_products},
+    )
+
+
+def deposit_pickup_receipt(request, pk):
+    pickup = get_object_or_404(
+        DepositPickup.objects.select_related("customer").prefetch_related("items__product"),
+        pk=pk
+    )
+    return render(request, "deposit_pickup_receipt.html", {"pickup": pickup})
