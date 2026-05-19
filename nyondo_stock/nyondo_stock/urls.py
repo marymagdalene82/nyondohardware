@@ -21,6 +21,8 @@ from nyondo import views as web_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    # Home page
+    path("", web_views.dashboard, name="dashboard"),
     # Path for the add product view
     path("add_product/", web_views.product_create, name="add_product"),
     # Default path to display the form and products
@@ -74,5 +76,26 @@ urlpatterns = [
         "deposits/pickups/<int:pk>/receipt/",
         web_views.deposit_pickup_receipt,
         name="deposit_pickup_receipt",
+    ),
+    # Paths for suppliers
+    path("suppliers/", web_views.supplier_list, name="supplier_list"),
+    path("suppliers/new/", web_views.supplier_create, name="supplier_create"),
+    path("suppliers/<int:pk>/", web_views.supplier_detail, name="supplier_detail"),
+    path("suppliers/<int:pk>/edit/", web_views.supplier_edit, name="supplier_edit"),
+    path(
+        "suppliers/credit/",
+        web_views.supplier_credit_report,
+        name="supplier_credit_report",
+    ),
+    # Paths for reporting
+    path("reports/sales/", web_views.report_sales_summary, name="report_sales_summary"),
+    path(
+        "reports/products/", web_views.report_product_sales, name="report_product_sales"
+    ),
+    path("reports/stock/", web_views.report_stock_levels, name="report_stock_levels"),
+    path(
+        "reports/deposits/",
+        web_views.report_deposit_summary,
+        name="report_deposit_summary",
     ),
 ]

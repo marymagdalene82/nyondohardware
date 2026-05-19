@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid mt-4">
+  <h4 class="mb-3">Sales Summary Report</h4>
+
+  <div class="card-custom mb-4">
+    <div class="card-custom-body">
+      <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label">From</label>
+          <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">To</label>
+          <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Customer Type</label>
+          <select name="customer_type" class="form-select">
+            <option value="">All</option>
+            {% for val,label in customer_types %}
+              <option value="{{ val }}" {% if customer_type == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-warning w-100" type="submit">Filter</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="card-custom stock-table-card"><div class="card-custom-body"><div class="text-muted">Sales</div><div class="h5 mb-0">{{ summary.count|default:0 }}</div></div></div></div>
+    <div class="col-md-4"><div class="card-custom stock-table-card"><div class="card-custom-body"><div class="text-muted">Total Revenue</div><div class="h5 mb-0">UGX {{ summary.total|default:0|floatformat:0 }}</div></div></div></div>
+    <div class="col-md-4"><div class="card-custom stock-table-card"><div class="card-custom-body"><div class="text-muted">Transport Collected</div><div class="h5 mb-0">UGX {{ summary.transport|default:0|floatformat:0 }}</div></div></div></div>
+  </div>
+
+  <div class="card-custom stock-table-card">
+    <div class="card-custom-body stock-table-body">
+      <div class="table-responsive">
+        <table class="table table-custom stock-table">
+          <thead class="stock-table-head">
+            <tr>
+              <th>Date</th><th>Customer</th><th>Type</th><th>Total</th><th>Transport</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in sales %}
+            <tr>
+              <td>{{ s.sale_date|date:"d M Y" }}</td>
+              <td>{{ s.customer_name|default:"-" }}</td>
+              <td>{{ s.get_customer_type_display }}</td>
+              <td>UGX {{ s.total_amount|floatformat:0 }}</td>
+              <td>UGX {{ s.transport_charge|floatformat:0 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center py-4">No sales found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -65,11 +65,11 @@
                         <td>{{ product.unit_price }}</td>
                         <td class="text-end">
                             <div class="d-inline-flex gap-1">
-                                <a href="{% url 'product_detail' product.pk %}" class="btn btn-xs btn-info"
+                                <a href="{% url 'product_detail' product.pk %}" class="btn btn-xs btn-outline-info"
                                     title="View"><i class="bi bi-eye"></i></a>
-                                <a href="{% url 'product_edit' product.pk %}" class="btn btn-xs btn-primary"
+                                <a href="{% url 'product_edit' product.pk %}" class="btn btn-xs btn-outline-primary"
                                     title="Edit"><i class="bi bi-pencil"></i></a>
-                                <a href="{% url 'product_delete' product.pk %}" class="btn btn-xs btn-danger"
+                                <a href="{% url 'product_delete' product.pk %}" class="btn btn-xs btn-outline-danger"
                                     title="Delete"><i class="bi bi-trash"></i></a>
                             </div>
                         </td>

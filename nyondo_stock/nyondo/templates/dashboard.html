@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Dashboard</h4>
+    <small class="text-muted">{{ today|date:"d M Y" }}</small>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card-custom stock-table-card">
+        <div class="card-custom-body">
+          <div class="text-muted">Sales Today</div>
+          <div class="h4 mb-0">{{ sales_today_count }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card-custom stock-table-card">
+        <div class="card-custom-body">
+          <div class="text-muted">Revenue Today</div>
+          <div class="h4 mb-0">UGX {{ sales_today_total|floatformat:0 }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card-custom stock-table-card">
+        <div class="card-custom-body">
+          <div class="text-muted">Transport Today</div>
+          <div class="h4 mb-0">UGX {{ transport_today_total|floatformat:0 }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card-custom stock-table-card">
+        <div class="card-custom-body">
+          <div class="text-muted">Items Sold Today</div>
+          <div class="h4 mb-0">{{ items_today_qty }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card-custom stock-table-card">
+        <div class="card-custom-body">
+          <div class="text-muted">Supplier Credit Outstanding</div>
+          <div class="h4 mb-0">UGX {{ supplier_credit_total|floatformat:0 }}</div>
+          <a class="btn btn-sm btn-outline-primary mt-2" href="{% url 'supplier_credit_report' %}">View report</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card-custom stock-table-card">
+        <div class="card-custom-body">
+          <div class="text-muted">Deposit Balance (All Customers)</div>
+          <div class="h4 mb-0">UGX {{ total_deposit_balance|floatformat:0 }}</div>
+          <div class="small text-muted">Deposits today: UGX {{ deposit_today|floatformat:0 }} • Pickups today: UGX {{ pickup_today|floatformat:0 }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card-custom stock-table-card">
+        <div class="card-custom-body">
+          <div class="text-muted">Quick Reports</div>
+          <div class="d-grid gap-2 mt-2">
+            <a class="btn btn-outline-secondary btn-sm" href="{% url 'report_sales_summary' %}">Sales Summary</a>
+            <a class="btn btn-outline-secondary btn-sm" href="{% url 'report_product_sales' %}">Product Sales</a>
+            <a class="btn btn-outline-secondary btn-sm" href="{% url 'report_stock_levels' %}">Stock Levels</a>
+            <a class="btn btn-outline-secondary btn-sm" href="{% url 'report_deposit_summary' %}">Deposit Summary</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <h5>Low Stock</h5>
+      <div class="card-custom stock-table-card">
+        <div class="card-custom-body stock-table-body">
+          <div class="table-responsive">
+            <table class="table table-custom stock-table">
+              <thead class="stock-table-head">
+                <tr><th>Product</th><th>Stock</th><th>Reorder</th></tr>
+              </thead>
+              <tbody>
+                {% for p in low_stock %}
+                <tr>
+                  <td>{{ p.product_name }}</td>
+                  <td>{{ p.stock }}</td>
+                  <td>{{ p.reorder_level }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="text-center py-4">No low stock items.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <h5>Out of Stock</h5>
+      <div class="card-custom stock-table-card">
+        <div class="card-custom-body stock-table-body">
+          <div class="table-responsive">
+            <table class="table table-custom stock-table">
+              <thead class="stock-table-head">
+                <tr><th>Product</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                {% for p in out_of_stock %}
+                <tr>
+                  <td>{{ p.product_name }}</td>
+                  <td><span class="badge bg-danger">Out</span></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="2" class="text-center py-4">No out of stock items.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

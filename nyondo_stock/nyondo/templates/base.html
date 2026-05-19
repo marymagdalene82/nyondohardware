@@ -26,7 +26,7 @@
                 <div class="sidebar-section-label">MAIN</div>
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link" href=""><i class="bi bi-speedometer"></i>Dashboard</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"><i class="bi bi-speedometer"></i>Dashboard</a>
                     </li>
 
                 </ul>
@@ -59,7 +59,8 @@
                 <div class="sidebar-section-label">DEPOSIT SCHEME</div>
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'deposit_customer_list' %}">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'deposit_customer_list' %}active{% endif %}"
+                            href="{% url 'deposit_customer_list' %}">
                             <i class="bi bi-wallet2"></i> Deposit Customers
                         </a>
                     </li>
@@ -68,18 +69,20 @@
                 <div class="sidebar-section-label">FINANCE</div>
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="suppliers.html"><i
+                        <a class="nav-link {% if request.resolver_match.url_name == 'supplier_list' %}active{% endif %}"
+                            aria-current="page" href="{% url 'supplier_list' %}"><i
                                 class="bi bi-building"></i>Suppliers</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="suppliers.html"><i
+                        <a class="nav-link {% if request.resolver_match.url_name == 'supplier_credit_report' %}active{% endif %}"
+                            aria-current="page" href="{% url 'supplier_credit_report' %}"><i
                                 class="bi bi-building"></i>Reports</a>
                     </li>
 
                 </ul>
 
                 <div class="logout">
-                    <a class="nav-link" href="index.html"><i class="bi bi-box-arrow-right"></i>Logout</a>
+                    <a class="nav-link" href="login.html"><i class="bi bi-box-arrow-right"></i>Logout</a>
                 </div>
             </div>
         </div>

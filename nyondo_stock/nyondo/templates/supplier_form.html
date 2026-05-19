@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid form-container mt-4">
+  <div class="row justify-content-center">
+    <div class="col form-area">
+      <h5 class="mb-3">{% if mode == "edit" %}Edit Supplier{% else %}New Supplier{% endif %}</h5>
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Name</label>
+            <input name="name" class="form-control" value="{{ supplier.name|default:'' }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Phone</label>
+            <input name="phone" class="form-control" value="{{ supplier.phone|default:'' }}" required>
+          </div>
+          <div class="col-md-12">
+            <label class="form-label">Contact Person</label>
+            <input name="contact_person" class="form-control" value="{{ supplier.contact_person|default:'' }}">
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3 mt-4">
+          <button class="btn btn-primary" type="submit">Save</button>
+          <a class="btn btn-outline-secondary" href="{% url 'supplier_list' %}">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,10 +1,11 @@
-from urllib import request
 from django.shortcuts import get_object_or_404, redirect, render
 from .models import Product, Category, StockEntry, Supplier, Sale, SaleItem,DepositCustomer, DepositTransaction, DepositPickup, DepositPickupItem
 from django.contrib import messages
 from decimal import Decimal
 from django.db import transaction, models
 from django.core.exceptions import ValidationError
+from django.utils import timezone
+from django.db.models import Sum, Count, Q, F, DecimalField, ExpressionWrapper
 
 
 # Create your views here.
@@ -497,3 +498,268 @@ def deposit_pickup_receipt(request, pk):
         pk=pk
     )
     return render(request, "deposit_pickup_receipt.html", {"pickup": pickup})
+
+# Views for supplier management
+def supplier_list(request):
+    q = (request.GET.get("q") or "").strip()
+    suppliers = Supplier.objects.all().order_by("name")
+    if q:
+        suppliers = suppliers.filter(
+            models.Q(name__icontains=q) |
+            models.Q(phone__icontains=q) |
+            models.Q(contact_person__icontains=q)
+        )
+    return render(request, "supplier_list.html", {"suppliers": suppliers, "q": q})
+
+
+def supplier_create(request):
+    if request.method == "POST":
+        name = (request.POST.get("name") or "").strip()
+        phone = (request.POST.get("phone") or "").strip()
+        contact_person = (request.POST.get("contact_person") or "").strip()
+
+        if not name or not phone:
+            messages.error(request, "Name and phone are required.")
+            return redirect("supplier_create")
+
+        Supplier.objects.create(name=name, phone=phone, contact_person=contact_person)
+        messages.success(request, "Supplier added.")
+        return redirect("supplier_list")
+
+    return render(request, "supplier_form.html", {"mode": "create"})
+
+
+def supplier_edit(request, pk):
+    supplier = get_object_or_404(Supplier, pk=pk)
+
+    if request.method == "POST":
+        name = (request.POST.get("name") or "").strip()
+        phone = (request.POST.get("phone") or "").strip()
+        contact_person = (request.POST.get("contact_person") or "").strip()
+
+        if not name or not phone:
+            messages.error(request, "Name and phone are required.")
+            return redirect("supplier_edit", pk=pk)
+
+        supplier.name = name
+        supplier.phone = phone
+        supplier.contact_person = contact_person
+        supplier.save(update_fields=["name", "phone", "contact_person"])
+
+        messages.success(request, "Supplier updated.")
+        return redirect("supplier_detail", pk=supplier.pk)
+
+    return render(request, "supplier_form.html", {"mode": "edit", "supplier": supplier})
+
+
+def supplier_detail(request, pk):
+    supplier = get_object_or_404(Supplier, pk=pk)
+
+    entries = (
+        StockEntry.objects.select_related("product")
+        .filter(supplier=supplier)
+        .order_by("-created_at")
+    )
+
+    summary = entries.aggregate(
+        total_supplied=models.Sum(models.F("quantity") * models.F("unit_cost")),
+        total_balance_due=models.Sum("balance_due"),
+    )
+
+    # fallback zeros
+    total_supplied = summary["total_supplied"] or Decimal("0.00")
+    total_balance_due = summary["total_balance_due"] or Decimal("0.00")
+
+    return render(
+        request,
+        "supplier_detail.html",
+        {
+            "supplier": supplier,
+            "entries": entries[:50],
+            "total_supplied": total_supplied,
+            "total_balance_due": total_balance_due,
+        },
+    )
+
+
+def supplier_credit_report(request):
+    suppliers = (
+        Supplier.objects.annotate(
+            outstanding=Sum(
+                "stockentry__balance_due",
+                filter=Q(stockentry__is_credit=True),
+            )
+        )
+        .filter(outstanding__gt=0)
+        .order_by("-outstanding", "name")
+    )
+    return render(request, "supplier_credit_report.html", {"suppliers": suppliers})
+
+# Views for reporting
+def dashboard(request):
+    today = timezone.localdate()
+
+    sales_today = Sale.objects.filter(sale_date__date=today)
+
+    sales_today_summary = sales_today.aggregate(
+        count=Count("id"),
+        total=Sum("total_amount"),
+        transport=Sum("transport_charge"),
+    )
+
+    items_today = SaleItem.objects.filter(sale__sale_date__date=today).aggregate(
+        qty=Sum("quantity")
+    )
+
+    low_stock = Product.objects.filter(stock__gt=0, stock__lt=F("reorder_level")).order_by("stock")[:10]
+    out_of_stock = Product.objects.filter(stock__lte=0).order_by("product_name")[:10]
+
+    supplier_credit_total = StockEntry.objects.filter(is_credit=True).aggregate(
+        total=Sum("balance_due")
+    )["total"] or Decimal("0.00")
+
+    top_credit_suppliers = (
+        Supplier.objects.annotate(
+            outstanding=Sum(
+                "stockentry__balance_due",
+                filter=Q(stockentry__is_credit=True),
+            )
+        )
+        .filter(outstanding__gt=0)
+        .order_by("-outstanding")[:5]
+    )
+
+    # deposit scheme totals (balance is computed per customer; easiest is sum in python)
+    deposit_customers = DepositCustomer.objects.all()
+    total_deposit_balance = sum((c.balance for c in deposit_customers), Decimal("0.00"))
+
+    deposit_today = DepositTransaction.objects.filter(
+        tx_type="DEPOSIT", created_at__date=today
+    ).aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
+
+    pickup_today = DepositTransaction.objects.filter(
+        tx_type="PICKUP", created_at__date=today
+    ).aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
+
+    context = {
+        "today": today,
+        "sales_today_count": sales_today_summary["count"] or 0,
+        "sales_today_total": sales_today_summary["total"] or Decimal("0.00"),
+        "transport_today_total": sales_today_summary["transport"] or Decimal("0.00"),
+        "items_today_qty": items_today["qty"] or 0,
+        "low_stock": low_stock,
+        "out_of_stock": out_of_stock,
+        "supplier_credit_total": supplier_credit_total,
+        "top_credit_suppliers": top_credit_suppliers,
+        "total_deposit_balance": total_deposit_balance,
+        "deposit_today": deposit_today,
+        "pickup_today": pickup_today,
+    }
+    return render(request, "dashboard.html", context)
+
+def report_sales_summary(request):
+    date_from = request.GET.get("date_from") or ""
+    date_to = request.GET.get("date_to") or ""
+    customer_type = request.GET.get("customer_type") or ""
+
+    qs = Sale.objects.all().order_by("-sale_date")
+
+    if date_from:
+        qs = qs.filter(sale_date__date__gte=date_from)
+    if date_to:
+        qs = qs.filter(sale_date__date__lte=date_to)
+    if customer_type:
+        qs = qs.filter(customer_type=customer_type)
+
+    summary = qs.aggregate(
+        count=Count("id"),
+        total=Sum("total_amount"),
+        transport=Sum("transport_charge"),
+    )
+
+    return render(
+        request,
+        "report_sales_summary.html",
+        {
+            "sales": qs[:200],
+            "summary": summary,
+            "date_from": date_from,
+            "date_to": date_to,
+            "customer_type": customer_type,
+            "customer_types": Sale.CUSTOMER_TYPE,
+        },
+    )
+
+def report_product_sales(request):
+    date_from = request.GET.get("date_from") or ""
+    date_to = request.GET.get("date_to") or ""
+
+    items = SaleItem.objects.select_related("product", "sale")
+
+    if date_from:
+        items = items.filter(sale__sale_date__date__gte=date_from)
+    if date_to:
+        items = items.filter(sale__sale_date__date__lte=date_to)
+
+    revenue_expr = ExpressionWrapper(F("quantity") * F("unit_price"), output_field=DecimalField())
+
+    rows = (
+        items.values("product__id", "product__product_name")
+        .annotate(
+            qty=Sum("quantity"),
+            revenue=Sum(revenue_expr),
+        )
+        .order_by("-revenue", "-qty", "product__product_name")
+    )
+
+    totals = rows.aggregate(
+        total_qty=Sum("qty"),
+        total_revenue=Sum("revenue"),
+    )
+
+    return render(
+        request,
+        "report_product_sales.html",
+        {
+            "rows": rows,
+            "totals": totals,
+            "date_from": date_from,
+            "date_to": date_to,
+        },
+    )
+
+def report_stock_levels(request):
+    low_only = request.GET.get("low_only") == "1"
+    qs = Product.objects.select_related("category").all().order_by("product_name")
+
+    if low_only:
+        qs = qs.filter(stock__lt=F("reorder_level"))
+
+    return render(request, "report_stock_levels.html", {"products": qs, "low_only": low_only})
+
+def report_deposit_summary(request):
+    date_from = request.GET.get("date_from") or ""
+    date_to = request.GET.get("date_to") or ""
+
+    txs = DepositTransaction.objects.select_related("customer").all().order_by("-created_at")
+
+    if date_from:
+        txs = txs.filter(created_at__date__gte=date_from)
+    if date_to:
+        txs = txs.filter(created_at__date__lte=date_to)
+
+    deposits_total = txs.filter(tx_type="DEPOSIT").aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
+    pickups_total = txs.filter(tx_type="PICKUP").aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
+
+    return render(
+        request,
+        "report_deposit_summary.html",
+        {
+            "txs": txs[:300],
+            "date_from": date_from,
+            "date_to": date_to,
+            "deposits_total": deposits_total,
+            "pickups_total": pickups_total,
+            "net_change": deposits_total - pickups_total,
+        },
+    )
