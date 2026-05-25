@@ -1,5 +1,5 @@
 {% load static %}
-
+{% load roles %}
 <!doctype html>
 <html lang="en">
 
@@ -7,12 +7,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Stock Registration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous" />
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" />
 
     <link rel="stylesheet" href="{% static 'style.css' %}" />
+    <title>{% block title %}{% endblock %}</title>
 </head>
 
 <body>
@@ -20,13 +25,19 @@
     <div class="container-fluid sidebar-layout">
         <div class="row">
             <div class="sidebar">
-                <div class="logo">
-                    <img src="./images/Nyondo.png" alt="Nyondo Logo" width="180px" />
+                <div class="logo brand-mark">
+                    <span class="brand-mark-badge"><img src="{% static 'logo.png' %}" alt="Nyondo Logo"
+                            width="80px"></span>
+                    <div class="brand-mark-copy">
+                        <strong>Nyondo</strong>
+                        <small>Hardware Management</small>
+                    </div>
                 </div>
                 <div class="sidebar-section-label">MAIN</div>
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"><i class="bi bi-speedometer"></i>Dashboard</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                            href="{% url 'dashboard' %}"><i class="bi bi-speedometer"></i>Dashboard</a>
                     </li>
 
                 </ul>
@@ -56,14 +67,23 @@
                     </li>
                 </ul>
 
-                <div class="sidebar-section-label">DEPOSIT SCHEME</div>
+                <div class="sidebar-section-label">PEOPLE</div>
                 <ul class="nav flex-column">
+                    
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'deposit_customer_list' %}active{% endif %}"
                             href="{% url 'deposit_customer_list' %}">
                             <i class="bi bi-wallet2"></i> Deposit Customers
                         </a>
                     </li>
+                 
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'user_list' %}active{% endif %}"
+                            href="{% url 'user_list' %}">
+                            <i class="bi bi-people"></i>User Management
+                        </a>
+                    </li>
+                  
 
                 </ul>
                 <div class="sidebar-section-label">FINANCE</div>
@@ -82,7 +102,11 @@
                 </ul>
 
                 <div class="logout">
-                    <a class="nav-link" href="login.html"><i class="bi bi-box-arrow-right"></i>Logout</a>
+                    {% if user.is_authenticated %}
+                    <a class="nav-link" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i>Logout</a>
+                    {% else %}
+                    <a class="nav-link" href="{% url 'login' %}"><i class="bi bi-box-arrow-right"></i>Login</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -91,18 +115,20 @@
     <!-- Main Content -->
     <div class="container-fluid main-wrapper">
         <div class="topbar">
-            <div class="salutations">
-                <h5>Register New Stock</h5>
-                <h6>Add a new product</h6>
+            <div class="salutations topbar-copy topbar-title">
+                
+                <h2>{% block subtitle %}{% endblock %}</h2>
+
+            
             </div>
             <div class="topbar-user">
                 <div class="user-info">
-                    <h6>Rita A</h6>
-                    <small>Store Manager</small>
+                    <h6>Welcome,{{ user.get_full_name|default:"User" }}</h6>
+                    <small>{{ user|job_title }}</small>
+                   
                 </div>
-                <div class="avatar">
-                    <img src="./images/happy.png" alt="User Avatar" width="40px" />
-                </div>
+                <!-- <div class="avatar">RA</div> -->
+                
             </div>
         </div>
         {% block content %} {% endblock %}

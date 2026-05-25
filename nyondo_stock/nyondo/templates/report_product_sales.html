@@ -1,20 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container-fluid mt-4">
-  <h4 class="mb-3">Product Sales Report</h4>
+<div class="report-shell">
+  <div class="report-hero">
+    <div class="dashboard-toolbar mb-0">
+      <div>
+        <h1 class="mb-1">Product Sales Report</h1>
+        <p>See which items are moving and how much revenue they are generating.</p>
+      </div>
+    </div>
+  </div>
 
-  <div class="card-custom mb-4">
+  <div class="card-custom filter-card mb-4">
     <div class="card-custom-body">
-      <form method="get" class="row g-3 align-items-end">
-        <div class="col-md-4">
+      <form method="get" class="report-filter-grid align-items-end">
+        <div>
           <label class="form-label">From</label>
           <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
         </div>
-        <div class="col-md-4">
+        <div>
           <label class="form-label">To</label>
           <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
         </div>
-        <div class="col-md-4">
+        <div class="d-flex align-items-end">
           <button class="btn btn-warning w-100" type="submit">
             <i class="bi bi-funnel me-1"></i>Filter
           </button>
@@ -23,30 +30,22 @@
     </div>
   </div>
 
-  <div class="row g-3 mb-4">
-    <div class="col-md-6">
-      <div class="card-custom stock-table-card">
-        <div class="card-custom-body">
-          <div class="text-muted">Total Quantity Sold</div>
-          <div class="h5 mb-0">{{ totals.total_qty|default:0 }}</div>
-        </div>
-      </div>
+  <div class="metric-grid mb-4">
+    <div class="metric-card">
+      <div class="metric-label">Total Quantity Sold</div>
+      <div class="metric-value">{{ totals.total_qty|default:0 }}</div>
     </div>
-    <div class="col-md-6">
-      <div class="card-custom stock-table-card">
-        <div class="card-custom-body">
-          <div class="text-muted">Total Revenue (Items Only)</div>
-          <div class="h5 mb-0">UGX {{ totals.total_revenue|default:0|floatformat:0 }}</div>
-          <div class="small text-muted">This excludes transport (transport is stored on Sale).</div>
-        </div>
-      </div>
+    <div class="metric-card">
+      <div class="metric-label">Total Revenue</div>
+      <div class="metric-value">UGX {{ totals.total_revenue|default:0|floatformat:0 }}</div>
+      <div class="metric-meta">Items only, excluding transport.</div>
     </div>
   </div>
 
   <div class="card-custom stock-table-card">
     <div class="card-custom-body stock-table-body">
       <div class="table-responsive">
-        <table class="table table-custom stock-table">
+        <table class="table table-custom stock-table mb-0">
           <thead class="stock-table-head">
             <tr>
               <th>Product</th>
@@ -71,6 +70,5 @@
       </div>
     </div>
   </div>
-
 </div>
 {% endblock %}

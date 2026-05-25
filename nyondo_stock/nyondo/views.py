@@ -1,22 +1,172 @@
+from django.contrib.auth import logout as auth_logout
 from django.shortcuts import get_object_or_404, redirect, render
 from .models import Product, Category, StockEntry, Supplier, Sale, SaleItem,DepositCustomer, DepositTransaction, DepositPickup, DepositPickupItem
 from django.contrib import messages
 from decimal import Decimal
 from django.db import transaction, models
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils import timezone
 from django.db.models import Sum, Count, Q, F, DecimalField, ExpressionWrapper
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.models import Group, User
 
 
 # Create your views here.
+# Auth landing page
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect("dashboard")
+
+    if request.method == "POST":
+        username = (request.POST.get("username") or "").strip()
+        password = request.POST.get("password") or ""
+
+        user = authenticate(request, username=username, password=password)
+        if user is None:
+            return render(request, "login.html", {"error": "Invalid username or password."})
+
+        login(request, user)
+
+        # Role-based redirect (optional)
+        if user.groups.filter(name="STORE_MANAGER").exists():
+            return redirect("product_list")
+        if user.groups.filter(name="SALES_ATTENDANT").exists():
+            return redirect("sale_list")
+        if user.groups.filter(name="ACCOUNTS_ADMIN").exists():
+            return redirect("dashboard")
+
+        # default fallback
+        return redirect("dashboard")
+
+    return render(request, "login.html")
+
+# View to handle log out
+def logout_view(request):
+    logout(request)
+    return redirect("login")
+
+@login_required
+def user_list(request):
+    require_any_group(request.user, "ACCOUNTS_ADMIN")
+
+    q = (request.GET.get("q") or "").strip()
+    users = User.objects.all().order_by("username")
+
+    if q:
+        users = users.filter(
+            models.Q(username__icontains=q) |
+            models.Q(first_name__icontains=q) |
+            models.Q(last_name__icontains=q)
+        )
+
+    return render(request, "user_list.html", {"users": users, "q": q})
+
+@login_required
+def user_create(request):
+    require_any_group(request.user, "ACCOUNTS_ADMIN")
+
+    role_choices = ["SALES_ATTENDANT", "STORE_MANAGER", "ACCOUNTS_ADMIN"]
+
+    if request.method == "POST":
+        username = (request.POST.get("username") or "").strip()
+        first_name = (request.POST.get("first_name") or "").strip()
+        last_name = (request.POST.get("last_name") or "").strip()
+        password1 = request.POST.get("password1") or ""
+        password2 = request.POST.get("password2") or ""
+        role = (request.POST.get("role") or "").strip()
+
+        errors = {}
+
+        if not username:
+            errors["username"] = "Username is required."
+        if not first_name:
+            errors["first_name"] = "First name is required."
+        if not last_name:
+            errors["last_name"] = "Last name is required."
+        if role not in role_choices:
+            errors["role"] = "Select a valid role."
+
+        if not password1:
+            errors["password1"] = "Password is required."
+        if password1 and len(password1) < 6:
+            errors["password1"] = "Password must be at least 6 characters."
+        if password1 != password2:
+            errors["password2"] = "Passwords do not match."
+
+        if username and User.objects.filter(username=username).exists():
+            errors["username"] = "That username is already taken."
+
+        # optional: use Django's validators (stronger)
+        if password1 and not errors.get("password1"):
+            try:
+                validate_password(password1)
+            except ValidationError as e:
+                errors["password1"] = " ".join(e.messages)
+
+        if errors:
+            messages.error(request, "Please correct the errors below.")
+            return render(
+                request,
+                "user_create.html",
+                {
+                    "errors": errors,
+                    "form_data": request.POST,
+                    "role_choices": role_choices,
+                },
+            )
+
+        # Ensure group exists
+        group, _ = Group.objects.get_or_create(name=role)
+
+        user = User.objects.create_user(
+            username=username,
+            password=password1,
+            first_name=first_name,
+            last_name=last_name,
+            is_staff=True,   # allows admin-like access if you later choose
+            is_active=True,
+        )
+
+        # Assign exactly one role group (remove any existing)
+        user.groups.clear()
+        user.groups.add(group)
+
+        messages.success(request, f"User '{username}' created and assigned role {role}.")
+        return redirect("user_list")
+
+    return render(request, "user_create.html", {"role_choices": role_choices})
+# decorator to restrict access to users in a specific group (or superusers)
+def require_any_group(user, *group_names):
+    if user.is_superuser:
+        return
+    if not user.groups.filter(name__in=group_names).exists():
+        raise PermissionDenied
+
 # View to display the form and products
+@login_required
 def product_list(request):
+    require_any_group(request.user, "SALES_ATTENDANT", "STORE_MANAGER", "ACCOUNTS_ADMIN")
     products = Product.objects.select_related("category").all()
-    return render(request, "list.html", {"products": products})
+    totals = products.aggregate(
+        total_products=Count("id"),
+        total_quantity=Sum("stock"),
+        stock_value=Sum(F("stock") * F("unit_cost"), output_field=DecimalField()),
+        low_stock_items=Count("id", filter=Q(stock__gt=0, stock__lt=F("reorder_level"))),
+        out_of_stock_items=Count("id", filter=Q(stock__lte=0)),
+    )
+
+    # fallback zeros (None -> 0)
+    for k in list(totals.keys()):
+        totals[k] = totals[k] or 0
+    return render(request, "list.html", {"products": products, "totals": totals})
 
 
 # View to handle product creation
+@login_required
 def product_create(request):
+    require_any_group(request.user, "STORE_MANAGER")
     if request.method == "POST":
         product_name = request.POST.get("product_name", "").strip()
         category_id = request.POST.get("category")
@@ -58,7 +208,9 @@ def product_create(request):
 
 
 # View to add stock when suppliers deliver products
+@login_required
 def add_stock(request):
+    require_any_group(request.user, "STORE_MANAGER")
     products = Product.objects.all()
     suppliers = Supplier.objects.all()
     if request.method == "POST":
@@ -87,25 +239,38 @@ def add_stock(request):
 
     return render(request, "stock_entry_form.html", context)
 
+@login_required
 
 def stock_entry_list(request):
-
+    require_any_group(request.user, "SALES_ATTENDANT", "STORE_MANAGER", "ACCOUNTS_ADMIN")
     entries = StockEntry.objects.select_related("product", "supplier").order_by(
         "-created_at"
     )
     credit_only = request.GET.get("credit_only") == "1"
     if credit_only:
-        entries = entries.filter(is_credit=True)
+        # show only credit entries that still have a balance due
+        entries = entries.filter(is_credit=True, balance_due__gt=0)
+    totals = entries.aggregate(
+    entries_count=Count("id"),
+    total_quantity=Sum("quantity"),
+    total_value=Sum(F("quantity") * F("unit_cost"), output_field=DecimalField()),
+    total_paid=Sum("amount_paid"),
+    total_balance=Sum("balance_due"),
+)
+    for k in list(totals.keys()):
+        totals[k] = totals[k] or 0
 
     return render(
         request,
         "stock_entry_list.html",
-        {"entries": entries, "credit_only": credit_only},
+        {"entries": entries, "credit_only": credit_only, "totals": totals},
     )
 
 
 # View to edit product details
+@login_required
 def product_edit(request, pk):
+    require_any_group(request.user, "STORE_MANAGER")
     product = get_object_or_404(Product, pk=pk)
 
     if request.method == "POST":
@@ -151,7 +316,9 @@ def product_edit(request, pk):
 
 
 # View to delete a product
+@login_required
 def product_delete(request, pk):
+    require_any_group(request.user, "STORE_MANAGER")
     product = get_object_or_404(Product, pk=pk)
 
     if request.method == "POST":
@@ -166,7 +333,10 @@ def product_delete(request, pk):
 from django.shortcuts import get_object_or_404
 
 
+@login_required
 def product_detail(request, pk):
+    require_any_group(request.user, "SALES_ATTENDANT", "STORE_MANAGER", "ACCOUNTS_ADMIN")
+  
     product = get_object_or_404(Product.objects.select_related("category"), pk=pk)
 
     # optional: show recent stock arrivals for this product
@@ -184,7 +354,9 @@ def product_detail(request, pk):
 
 
 # View to display stock entry details
+@login_required
 def stock_entry_detail(request, pk):
+    require_any_group(request.user, "SALES_ATTENDANT", "STORE_MANAGER", "ACCOUNTS_ADMIN")
     entry = get_object_or_404(
         StockEntry.objects.select_related("product", "supplier"), pk=pk
     )
@@ -192,7 +364,9 @@ def stock_entry_detail(request, pk):
 
 
 # View to handle payments for credit stock entries
+@login_required
 def stock_entry_pay(request, pk):
+    require_any_group(request.user, "STORE_MANAGER")
     entry = get_object_or_404(
         StockEntry.objects.select_related("product", "supplier"), pk=pk
     )
@@ -231,18 +405,31 @@ def stock_entry_pay(request, pk):
 
 
 # Views for sales management
+@login_required
 def sale_list(request):
+    require_any_group(request.user, "SALES_ATTENDANT", "STORE_MANAGER", "ACCOUNTS_ADMIN")
     sales = Sale.objects.prefetch_related("items").all().order_by("-sale_date")
-    context = {"sales": sales}
+    totals = sales.aggregate(
+    sales_count=Count("id"),
+    total_revenue=Sum("total_amount"),
+    transport_total=Sum("transport_charge"),
+)
+    for k in list(totals.keys()):
+        totals[k] = totals[k] or 0
+    context = {"sales": sales, "totals": totals}
     return render(request, "sale_list.html", context)
 
 
+@login_required
 def sale_detail(request, pk):
+    require_any_group(request.user, "SALES_ATTENDANT", "STORE_MANAGER", "ACCOUNTS_ADMIN")
     sale = get_object_or_404(Sale.objects.prefetch_related("items__product"), pk=pk)
     return render(request, "sale_detail.html", {"sale": sale})
 
 
+@login_required
 def sale_create(request):
+    require_any_group(request.user, "SALES_ATTENDANT", "STORE_MANAGER", "ACCOUNTS_ADMIN")
     if request.method == "POST":
         customer_name = (request.POST.get("customer_name") or "").strip()
         customer_type = request.POST.get("customer_type")
@@ -267,6 +454,7 @@ def sale_create(request):
                 distance_km=float(distance_km),
                 total_amount=Decimal("0.00"),
                 transport_charge=Decimal("0.00"),
+                processed_by=request.user,
             )
 
             items_total = Decimal("0.00")
@@ -321,13 +509,16 @@ def sale_create(request):
     products = Product.objects.all().order_by("product_name")
     return render(request, "create_sale.html", {"products": products})
 
-
+@login_required
 def sale_receipt(request, pk):
+    require_any_group(request.user, "SALES_ATTENDANT", "STORE_MANAGER", "ACCOUNTS_ADMIN")
     sale = get_object_or_404(Sale.objects.prefetch_related("items__product"), pk=pk)
     return render(request, "receipt.html", {"sale": sale})
 
 # Views for deposit management
+@login_required
 def deposit_customer_list(request):
+    require_any_group(request.user, "ACCOUNTS_ADMIN")
     q = (request.GET.get("q") or "").strip()
     customers = DepositCustomer.objects.all().order_by("-id")
     if q:
@@ -338,8 +529,9 @@ def deposit_customer_list(request):
         )
     return render(request, "deposit_customer_list.html", {"customers": customers, "q": q})
 
-
+@login_required
 def deposit_customer_create(request):
+    require_any_group(request.user, "ACCOUNTS_ADMIN")
     if request.method == "POST":
         full_name = (request.POST.get("full_name") or "").strip()
         nin = (request.POST.get("nin") or "").strip().upper()
@@ -367,8 +559,9 @@ def deposit_customer_create(request):
 
     return render(request, "deposit_customer_form.html")
 
-
+@login_required
 def deposit_customer_detail(request, pk):
+    require_any_group(request.user, "ACCOUNTS_ADMIN")
     customer = get_object_or_404(DepositCustomer, pk=pk)
     transactions = customer.transactions.order_by("-created_at")[:20]
     pickups = customer.pickups.order_by("-created_at")[:10]
@@ -378,8 +571,9 @@ def deposit_customer_detail(request, pk):
         {"customer": customer, "transactions": transactions, "pickups": pickups},
     )
 
-
+@login_required
 def deposit_make(request, pk):
+    require_any_group(request.user, "ACCOUNTS_ADMIN")
     customer = get_object_or_404(DepositCustomer, pk=pk)
 
     if request.method == "POST":
@@ -407,8 +601,9 @@ def deposit_make(request, pk):
 
     return render(request, "deposit_make.html", {"customer": customer})
 
-
+@login_required
 def deposit_receipt(request, pk):
+    require_any_group(request.user, "ACCOUNTS_ADMIN")
     tx = get_object_or_404(
         DepositTransaction.objects.select_related("customer"),
         pk=pk,
@@ -417,7 +612,9 @@ def deposit_receipt(request, pk):
     return render(request, "deposit_receipt.html", {"tx": tx})
 
 
+@login_required
 def deposit_pickup_create(request, pk):
+    require_any_group(request.user, "ACCOUNTS_ADMIN")
     customer = get_object_or_404(DepositCustomer, pk=pk)
     eligible_products = Product.objects.select_related("category").filter(
         category__is_deposit_allowed=True
@@ -492,7 +689,9 @@ def deposit_pickup_create(request, pk):
     )
 
 
+@login_required
 def deposit_pickup_receipt(request, pk):
+    require_any_group(request.user, "ACCOUNTS_ADMIN")
     pickup = get_object_or_404(
         DepositPickup.objects.select_related("customer").prefetch_related("items__product"),
         pk=pk
@@ -500,7 +699,9 @@ def deposit_pickup_receipt(request, pk):
     return render(request, "deposit_pickup_receipt.html", {"pickup": pickup})
 
 # Views for supplier management
+@login_required
 def supplier_list(request):
+    require_any_group(request.user, "STORE_MANAGER", "ACCOUNTS_ADMIN")
     q = (request.GET.get("q") or "").strip()
     suppliers = Supplier.objects.all().order_by("name")
     if q:
@@ -512,7 +713,9 @@ def supplier_list(request):
     return render(request, "supplier_list.html", {"suppliers": suppliers, "q": q})
 
 
+@login_required
 def supplier_create(request):
+    require_any_group(request.user, "STORE_MANAGER", "ACCOUNTS_ADMIN")
     if request.method == "POST":
         name = (request.POST.get("name") or "").strip()
         phone = (request.POST.get("phone") or "").strip()
@@ -529,7 +732,9 @@ def supplier_create(request):
     return render(request, "supplier_form.html", {"mode": "create"})
 
 
+@login_required
 def supplier_edit(request, pk):
+    require_any_group(request.user, "STORE_MANAGER", "ACCOUNTS_ADMIN")
     supplier = get_object_or_404(Supplier, pk=pk)
 
     if request.method == "POST":
@@ -552,7 +757,9 @@ def supplier_edit(request, pk):
     return render(request, "supplier_form.html", {"mode": "edit", "supplier": supplier})
 
 
+@login_required
 def supplier_detail(request, pk):
+    require_any_group(request.user, "STORE_MANAGER", "ACCOUNTS_ADMIN")
     supplier = get_object_or_404(Supplier, pk=pk)
 
     entries = (
@@ -582,7 +789,9 @@ def supplier_detail(request, pk):
     )
 
 
+@login_required
 def supplier_credit_report(request):
+    require_any_group(request.user,"ACCOUNTS_ADMIN")
     suppliers = (
         Supplier.objects.annotate(
             outstanding=Sum(
@@ -596,7 +805,9 @@ def supplier_credit_report(request):
     return render(request, "supplier_credit_report.html", {"suppliers": suppliers})
 
 # Views for reporting
+@login_required
 def dashboard(request):
+    require_any_group(request.user, "ACCOUNTS_ADMIN")
     today = timezone.localdate()
 
     sales_today = Sale.objects.filter(sale_date__date=today)
@@ -657,7 +868,9 @@ def dashboard(request):
     }
     return render(request, "dashboard.html", context)
 
+@login_required
 def report_sales_summary(request):
+    require_any_group(request.user, "ACCOUNTS_ADMIN")
     date_from = request.GET.get("date_from") or ""
     date_to = request.GET.get("date_to") or ""
     customer_type = request.GET.get("customer_type") or ""
@@ -690,7 +903,9 @@ def report_sales_summary(request):
         },
     )
 
+@login_required
 def report_product_sales(request):
+    require_any_group(request.user, "ACCOUNTS_ADMIN")
     date_from = request.GET.get("date_from") or ""
     date_to = request.GET.get("date_to") or ""
 
@@ -728,7 +943,9 @@ def report_product_sales(request):
         },
     )
 
+@login_required
 def report_stock_levels(request):
+    require_any_group(request.user, "ACCOUNTS_ADMIN")
     low_only = request.GET.get("low_only") == "1"
     qs = Product.objects.select_related("category").all().order_by("product_name")
 
@@ -737,7 +954,9 @@ def report_stock_levels(request):
 
     return render(request, "report_stock_levels.html", {"products": qs, "low_only": low_only})
 
+@login_required
 def report_deposit_summary(request):
+    require_any_group(request.user, "ACCOUNTS_ADMIN")
     date_from = request.GET.get("date_from") or ""
     date_to = request.GET.get("date_to") or ""
 

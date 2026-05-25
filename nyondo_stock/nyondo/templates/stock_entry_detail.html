@@ -1,37 +1,32 @@
-{% load humanize %}
 {% extends "base.html" %}
+{% load humanize %}
 {% block content %}
-<div class="container-fluid mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <h4 class="mb-0">Stock Entry</h4>
-      <small class="text-muted">{{ entry.created_at|date:"d M Y, H:i" }}</small>
-    </div>
-    <div class="d-flex gap-2">
-      {% if entry.balance_due > 0 %}
-      <a class="btn btn-outline-warning" href="{% url 'stock_entry_pay' entry.pk %}">
-        <i class="bi bi-cash"></i> Pay
-      </a>
-      {% endif %}
-      <a class="btn btn-outline-secondary" href="{% url 'stock_entry_list' %}">Back</a>
+<div class="report-shell">
+  <div class="page-hero">
+    <div class="dashboard-toolbar mb-0">
+      <div>
+        <h1 class="mb-1">Stock Entry</h1>
+        <p>{{ entry.created_at|date:"d M Y, H:i" }}</p>
+      </div>
+      <div class="report-actions">
+        {% if entry.balance_due > 0 %}<a class="btn btn-outline-warning" href="{% url 'stock_entry_pay' entry.pk %}"><i class="bi bi-cash me-1"></i>Pay</a>{% endif %}
+        <a class="btn btn-outline-secondary" href="{% url 'stock_entry_list' %}">Back</a>
+      </div>
     </div>
   </div>
 
-  <div class="card-custom stock-table-card">
-    <div class="card-custom-body stock-table-body">
-      <div class="row g-3">
-        <div class="col-md-4"><strong>Product:</strong> {{ entry.product.product_name }}</div>
-        <div class="col-md-4"><strong>Supplier:</strong> {{ entry.supplier.name }}</div>
-        <div class="col-md-4"><strong>Quantity:</strong> {{ entry.quantity }}</div>
+  <div class="metric-grid mb-4">
+    <div class="metric-card"><div class="metric-label">Product</div><div class="metric-value">{{ entry.product.product_name }}</div></div>
+    <div class="metric-card"><div class="metric-label">Supplier</div><div class="metric-value">{{ entry.supplier.name }}</div></div>
+    <div class="metric-card"><div class="metric-label">Quantity</div><div class="metric-value">{{ entry.quantity }}</div></div>
+    <div class="metric-card"><div class="metric-label">Credit</div><div class="metric-value">{% if entry.is_credit %}Yes{% else %}No{% endif %}</div></div>
+  </div>
 
-        <div class="col-md-4"><strong>Unit Cost:</strong> UGX {{ entry.unit_cost }}</div>
-        <div class="col-md-4"><strong>Total:</strong> UGX {{ entry.total|floatformat:0 }}</div>
-        <div class="col-md-4"><strong>Credit:</strong> {% if entry.is_credit %}Yes{% else %}No{% endif %}</div>
-
-        <div class="col-md-4"><strong>Amount Paid:</strong> UGX {{ entry.amount_paid|floatformat:0 }}</div>
-        <div class="col-md-4"><strong>Balance Due:</strong> UGX {{ entry.balance_due|floatformat:0 }}</div>
-      </div>
-    </div>
+  <div class="metric-grid mb-4">
+    <div class="metric-card"><div class="metric-label">Unit Cost</div><div class="metric-value">UGX {{ entry.unit_cost|floatformat:0 }}</div></div>
+    <div class="metric-card"><div class="metric-label">Total</div><div class="metric-value">UGX {{ entry.total|floatformat:0 }}</div></div>
+    <div class="metric-card"><div class="metric-label">Amount Paid</div><div class="metric-value">UGX {{ entry.amount_paid|floatformat:0 }}</div></div>
+    <div class="metric-card metric-card--highlight"><div class="metric-label">Balance Due</div><div class="metric-value">UGX {{ entry.balance_due|floatformat:0 }}</div></div>
   </div>
 </div>
 {% endblock %}

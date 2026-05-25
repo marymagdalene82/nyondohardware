@@ -1,29 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container-fluid mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <h4 class="mb-0">Sale #{{ sale.pk }}</h4>
-      <small class="text-muted">{{ sale.sale_date|date:"d M Y, H:i" }}</small>
-    </div>
-    <a class="btn btn-outline-secondary" href="{% url 'sale_list' %}">Back</a>
-  </div>
-
-  <div class="card-custom stock-table-card mb-4">
-    <div class="card-custom-body stock-table-body">
-      <div class="row g-3">
-        <div class="col-md-4"><strong>Items Total:</strong> UGX {{ sale.total_amount|floatformat:0 }}</div>
-        <div class="col-md-4"><strong>Transport:</strong> UGX {{ sale.transport_charge|floatformat:0 }}</div>
-        <div class="col-md-4"><strong>Grand Total:</strong> UGX {{ sale.total_amount|floatformat:0 }}</div>
+<div class="report-shell">
+  <div class="page-hero">
+    <div class="dashboard-toolbar mb-0">
+      <div>
+        <h1 class="mb-1">Sale #{{ sale.pk }}</h1>
+        <p>{{ sale.sale_date|date:"d M Y, H:i" }}</p>
+      </div>
+      <div class="report-actions">
+        <a class="btn btn-outline-secondary" href="{% url 'sale_list' %}">Back</a>
       </div>
     </div>
   </div>
 
-  <h5>Items</h5>
+  <div class="metric-grid mb-4">
+    <div class="metric-card"><div class="metric-label">Items Total</div><div class="metric-value">UGX {{ sale.total_amount|floatformat:0 }}</div></div>
+    <div class="metric-card"><div class="metric-label">Transport</div><div class="metric-value">UGX {{ sale.transport_charge|floatformat:0 }}</div></div>
+    <div class="metric-card metric-card--highlight"><div class="metric-label">Grand Total</div><div class="metric-value">UGX {{ sale.total_amount|floatformat:0 }}</div></div>
+  </div>
+
+  <div class="section-title"><h5>Items</h5></div>
   <div class="card-custom stock-table-card">
     <div class="card-custom-body stock-table-body">
       <div class="table-responsive">
-        <table class="table table-custom stock-table">
+        <table class="table table-custom stock-table mb-0">
           <thead class="stock-table-head">
             <tr>
               <th>Product</th>
@@ -37,7 +37,7 @@
             <tr>
               <td>{{ i.product.product_name }}</td>
               <td>{{ i.quantity }}</td>
-              <td>UGX {{ i.unit_price }}</td>
+              <td>UGX {{ i.unit_price|floatformat:0 }}</td>
               <td>UGX {{ i.subtotal|floatformat:0 }}</td>
             </tr>
             {% empty %}
@@ -48,6 +48,5 @@
       </div>
     </div>
   </div>
-
 </div>
 {% endblock %}

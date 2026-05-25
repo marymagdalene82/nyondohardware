@@ -1,20 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container-fluid mt-4">
-  <h4 class="mb-3">Sales Summary Report</h4>
+<div class="report-shell">
+  <div class="report-hero">
+    <div class="dashboard-toolbar mb-0">
+      <div>
+        <h1 class="mb-1">Sales Summary Report</h1>
+        <p>Review overall sales activity, revenue, and transport collected for the selected period.</p>
+      </div>
+    </div>
+  </div>
 
-  <div class="card-custom mb-4">
+  <div class="card-custom filter-card mb-4">
     <div class="card-custom-body">
-      <form method="get" class="row g-3 align-items-end">
-        <div class="col-md-3">
+      <form method="get" class="report-filter-grid align-items-end">
+        <div>
           <label class="form-label">From</label>
           <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
         </div>
-        <div class="col-md-3">
+        <div>
           <label class="form-label">To</label>
           <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
         </div>
-        <div class="col-md-4">
+        <div>
           <label class="form-label">Customer Type</label>
           <select name="customer_type" class="form-select">
             <option value="">All</option>
@@ -23,23 +30,32 @@
             {% endfor %}
           </select>
         </div>
-        <div class="col-md-2">
+        <div>
           <button class="btn btn-warning w-100" type="submit">Filter</button>
         </div>
       </form>
     </div>
   </div>
 
-  <div class="row g-3 mb-4">
-    <div class="col-md-4"><div class="card-custom stock-table-card"><div class="card-custom-body"><div class="text-muted">Sales</div><div class="h5 mb-0">{{ summary.count|default:0 }}</div></div></div></div>
-    <div class="col-md-4"><div class="card-custom stock-table-card"><div class="card-custom-body"><div class="text-muted">Total Revenue</div><div class="h5 mb-0">UGX {{ summary.total|default:0|floatformat:0 }}</div></div></div></div>
-    <div class="col-md-4"><div class="card-custom stock-table-card"><div class="card-custom-body"><div class="text-muted">Transport Collected</div><div class="h5 mb-0">UGX {{ summary.transport|default:0|floatformat:0 }}</div></div></div></div>
+  <div class="metric-grid mb-4">
+    <div class="metric-card">
+      <div class="metric-label">Sales</div>
+      <div class="metric-value">{{ summary.count|default:0 }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Total Revenue</div>
+      <div class="metric-value">UGX {{ summary.total|default:0|floatformat:0 }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Transport Collected</div>
+      <div class="metric-value">UGX {{ summary.transport|default:0|floatformat:0 }}</div>
+    </div>
   </div>
 
   <div class="card-custom stock-table-card">
     <div class="card-custom-body stock-table-body">
       <div class="table-responsive">
-        <table class="table table-custom stock-table">
+        <table class="table table-custom stock-table mb-0">
           <thead class="stock-table-head">
             <tr>
               <th>Date</th><th>Customer</th><th>Type</th><th>Total</th><th>Transport</th>
@@ -49,7 +65,7 @@
             {% for s in sales %}
             <tr>
               <td>{{ s.sale_date|date:"d M Y" }}</td>
-              <td>{{ s.customer_name|default:"-" }}</td>
+              <td class="fw-semibold">{{ s.customer_name|default:"-" }}</td>
               <td>{{ s.get_customer_type_display }}</td>
               <td>UGX {{ s.total_amount|floatformat:0 }}</td>
               <td>UGX {{ s.transport_charge|floatformat:0 }}</td>

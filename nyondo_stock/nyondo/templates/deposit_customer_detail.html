@@ -1,37 +1,31 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container-fluid mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <h4 class="mb-0">{{ customer.full_name }}</h4>
-      <small class="text-muted">{{ customer.nin }} • {{ customer.phone }}</small>
-    </div>
-    <div class="d-flex gap-2">
-      <a class="btn btn-outline-warning" href="{% url 'deposit_make' customer.pk %}">
-        <i class="bi bi-cash"></i> Deposit
-      </a>
-      <a class="btn btn-outline-primary" href="{% url 'deposit_pickup_create' customer.pk %}">
-        <i class="bi bi-box-seam"></i> Pickup Goods
-      </a>
-      <a class="btn btn-outline-secondary" href="{% url 'deposit_customer_list' %}">Back</a>
-    </div>
-  </div>
-
-  <div class="card-custom stock-table-card mb-4">
-    <div class="card-custom-body stock-table-body">
-      <div class="row g-3">
-        <div class="col-md-4"><strong>Balance:</strong> UGX {{ customer.balance|floatformat:0 }}</div>
-        <div class="col-md-4"><strong>Occupation:</strong> {{ customer.occupation|default:"-" }}</div>
-        <div class="col-md-4"><strong>Address:</strong> {{ customer.address|default:"-" }}</div>
+<div class="report-shell">
+  <div class="page-hero">
+    <div class="dashboard-toolbar mb-0">
+      <div>
+        <h1 class="mb-1">{{ customer.full_name }}</h1>
+        <p>{{ customer.nin }} · {{ customer.phone }}</p>
+      </div>
+      <div class="report-actions">
+        <a class="btn btn-outline-warning" href="{% url 'deposit_make' customer.pk %}"><i class="bi bi-cash me-1"></i>Deposit</a>
+        <a class="btn btn-outline-primary" href="{% url 'deposit_pickup_create' customer.pk %}"><i class="bi bi-box-seam me-1"></i>Pickup Goods</a>
+        <a class="btn btn-outline-secondary" href="{% url 'deposit_customer_list' %}">Back</a>
       </div>
     </div>
   </div>
 
-  <h5 class="mb-2">Recent Transactions</h5>
+  <div class="metric-grid mb-4">
+    <div class="metric-card metric-card--highlight"><div class="metric-label">Balance</div><div class="metric-value">UGX {{ customer.balance|floatformat:0 }}</div></div>
+    <div class="metric-card"><div class="metric-label">Occupation</div><div class="metric-value">{{ customer.occupation|default:"-" }}</div></div>
+    <div class="metric-card"><div class="metric-label">Address</div><div class="metric-value">{{ customer.address|default:"-" }}</div></div>
+  </div>
+
+  <div class="section-title"><h5>Recent Transactions</h5></div>
   <div class="card-custom stock-table-card mb-4">
     <div class="card-custom-body stock-table-body">
       <div class="table-responsive">
-        <table class="table table-custom stock-table">
+        <table class="table table-custom stock-table mb-0">
           <thead class="stock-table-head">
             <tr>
               <th>Date</th>
@@ -57,11 +51,11 @@
     </div>
   </div>
 
-  <h5 class="mb-2">Recent Pickups</h5>
+  <div class="section-title"><h5>Recent Pickups</h5></div>
   <div class="card-custom stock-table-card">
     <div class="card-custom-body stock-table-body">
       <div class="table-responsive">
-        <table class="table table-custom stock-table">
+        <table class="table table-custom stock-table mb-0">
           <thead class="stock-table-head">
             <tr>
               <th>Date</th>
@@ -74,12 +68,7 @@
             <tr>
               <td>{{ p.created_at|date:"d M Y" }}</td>
               <td>UGX {{ p.total|floatformat:0 }}</td>
-              <td class="text-end">
-                <a class="btn btn-sm btn-outline-dark" target="_blank"
-                   href="{% url 'deposit_pickup_receipt' p.pk %}">
-                  <i class="bi bi-printer"></i>
-                </a>
-              </td>
+              <td class="text-end"><a class="btn btn-sm btn-outline-dark" target="_blank" href="{% url 'deposit_pickup_receipt' p.pk %}"><i class="bi bi-printer"></i></a></td>
             </tr>
             {% empty %}
             <tr><td colspan="3" class="text-center py-4">No pickups yet.</td></tr>
@@ -89,6 +78,5 @@
       </div>
     </div>
   </div>
-
 </div>
 {% endblock %}

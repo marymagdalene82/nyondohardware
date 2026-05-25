@@ -1,39 +1,48 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4 mt-4">
-  <h4>Supplier Credit Report</h4>
-  <a href="{% url 'supplier_list' %}" class="btn btn-outline-secondary">Suppliers</a>
-</div>
+<div class="report-shell">
+  <div class="report-hero">
+    <div class="dashboard-toolbar mb-0">
+      <div>
+        <h1 class="mb-1">Supplier Credit Report</h1>
+        <p>See which suppliers are carrying outstanding balances.</p>
+      </div>
+      <div class="report-actions">
+        <a href="{% url 'supplier_list' %}" class="btn btn-light">Suppliers</a>
+      </div>
+    </div>
+  </div>
 
-<div class="card-custom stock-table-card">
-  <div class="card-custom-body stock-table-body">
-    <div class="table-responsive">
-      <table class="table table-custom stock-table">
-        <thead class="stock-table-head">
-          <tr>
-            <th>Supplier</th>
-            <th>Phone</th>
-            <th>Outstanding Balance</th>
-            <th class="text-end">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for s in suppliers %}
-          <tr>
-            <td class="fw-semibold">{{ s.name }}</td>
-            <td>{{ s.phone }}</td>
-            <td class="fw-bold">UGX {{ s.outstanding|floatformat:0 }}</td>
-            <td class="text-end">
-              <a class="btn btn-sm btn-outline-primary" href="{% url 'supplier_detail' s.pk %}">
-                <i class="bi bi-eye"></i>
-              </a>
-            </td>
-          </tr>
-          {% empty %}
-          <tr><td colspan="4" class="text-center py-4">No suppliers currently on credit.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <div class="card-custom stock-table-card">
+    <div class="card-custom-body stock-table-body">
+      <div class="table-responsive">
+        <table class="table table-custom stock-table mb-0">
+          <thead class="stock-table-head">
+            <tr>
+              <th>Supplier</th>
+              <th>Phone</th>
+              <th>Outstanding Balance</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in suppliers %}
+            <tr>
+              <td class="fw-semibold">{{ s.name }}</td>
+              <td>{{ s.phone }}</td>
+              <td class="fw-bold">UGX {{ s.outstanding|floatformat:0 }}</td>
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'supplier_detail' s.pk %}">
+                  <i class="bi bi-eye"></i>
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center py-4">No suppliers currently on credit.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>

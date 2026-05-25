@@ -1,48 +1,41 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container-fluid mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <h4 class="mb-0">{{ product.product_name }}</h4>
-      <small class="text-muted">
-        {{ product.category.name }}{% if product.variant %} • {{ product.variant }}{% endif %}
-      </small>
-    </div>
-
-    <div class="d-flex gap-2">
-      <a class="btn btn-outline-primary" href="{% url 'product_edit' product.pk %}">
-        <i class="bi bi-pencil"></i> Edit
-      </a>
-      <a class="btn btn-outline-danger" href="{% url 'product_delete' product.pk %}">
-        <i class="bi bi-trash"></i> Delete
-      </a>
-      <a class="btn btn-outline-secondary" href="{% url 'product_list' %}">
-        Back
-      </a>
-    </div>
-  </div>
-
-  <div class="card-custom stock-table-card mb-4">
-    <div class="card-custom-body stock-table-body">
-      <div class="row g-3">
-        <div class="col-md-3"><strong>Unit:</strong> {{ product.unit }}</div>
-        <div class="col-md-3"><strong>Stock:</strong> {{ product.stock }}</div>
-        <div class="col-md-3"><strong>Status:</strong> {{ product.stock_status }}</div>
-        <div class="col-md-3"><strong>Reorder level:</strong> {{ product.reorder_level }}</div>
-
-        <div class="col-md-3"><strong>Unit Cost:</strong> UGX {{ product.unit_cost }}</div>
-        <div class="col-md-3"><strong>Selling Price:</strong> UGX {{ product.unit_price }}</div>
-        <div class="col-md-3"><strong>Date added:</strong> {{ product.date_added|date:"d M Y" }}</div>
-        <div class="col-md-3"><strong>Updated:</strong> {{ product.updated_at|date:"d M Y" }}</div>
+<div class="report-shell">
+  <div class="page-hero">
+    <div class="dashboard-toolbar mb-0">
+      <div>
+        <h1 class="mb-1">{{ product.product_name }}</h1>
+        <p>{{ product.category.name }}{% if product.variant %} · {{ product.variant }}{% endif %}</p>
+      </div>
+      <div class="report-actions">
+        <a class="btn btn-outline-primary" href="{% url 'product_edit' product.pk %}"><i class="bi bi-pencil me-1"></i>Edit</a>
+        <a class="btn btn-outline-danger" href="{% url 'product_delete' product.pk %}"><i class="bi bi-trash me-1"></i>Delete</a>
+        <a class="btn btn-outline-secondary" href="{% url 'product_list' %}">Back</a>
       </div>
     </div>
   </div>
 
-  <h5 class="mb-2">Recent Stock Arrivals</h5>
+  <div class="metric-grid mb-4">
+    <div class="metric-card"><div class="metric-label">Unit</div><div class="metric-value">{{ product.unit }}</div></div>
+    <div class="metric-card"><div class="metric-label">Stock</div><div class="metric-value">{{ product.stock }}</div></div>
+    <div class="metric-card"><div class="metric-label">Status</div><div class="metric-value">{{ product.stock_status }}</div></div>
+    <div class="metric-card"><div class="metric-label">Reorder Level</div><div class="metric-value">{{ product.reorder_level }}</div></div>
+  </div>
+
+  <div class="metric-grid mb-4">
+    <div class="metric-card"><div class="metric-label">Unit Cost</div><div class="metric-value">UGX {{ product.unit_cost|floatformat:0 }}</div></div>
+    <div class="metric-card"><div class="metric-label">Selling Price</div><div class="metric-value">UGX {{ product.unit_price|floatformat:0 }}</div></div>
+    <div class="metric-card"><div class="metric-label">Date Added</div><div class="metric-value">{{ product.date_added|date:"d M Y" }}</div></div>
+    <div class="metric-card"><div class="metric-label">Updated</div><div class="metric-value">{{ product.updated_at|date:"d M Y" }}</div></div>
+  </div>
+
+  <div class="section-title">
+    <h5>Recent Stock Arrivals</h5>
+  </div>
   <div class="card-custom stock-table-card">
     <div class="card-custom-body stock-table-body">
       <div class="table-responsive">
-        <table class="table table-custom stock-table">
+        <table class="table table-custom stock-table mb-0">
           <thead class="stock-table-head">
             <tr>
               <th>Date</th>
@@ -60,27 +53,18 @@
               <td>{{ e.created_at|date:"d M Y" }}</td>
               <td>{{ e.supplier.name }}</td>
               <td>{{ e.quantity }}</td>
-              <td>UGX {{ e.unit_cost }}</td>
+              <td>UGX {{ e.unit_cost|floatformat:0 }}</td>
               <td>UGX {{ e.total|floatformat:0 }}</td>
-              <td>
-                {% if e.is_credit %}
-                  <span class="badge bg-warning text-dark">Credit</span>
-                {% else %}
-                  <span class="badge bg-success">Paid</span>
-                {% endif %}
-              </td>
-              <td>UGX {{ e.balance_due }}</td>
+              <td>{% if e.is_credit %}<span class="badge bg-warning text-dark">Credit</span>{% else %}<span class="badge bg-success">Paid</span>{% endif %}</td>
+              <td>UGX {{ e.balance_due|floatformat:0 }}</td>
             </tr>
             {% empty %}
-            <tr>
-              <td colspan="7" class="text-center py-4">No arrivals for this product yet.</td>
-            </tr>
+            <tr><td colspan="7" class="text-center py-4">No arrivals for this product yet.</td></tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
   </div>
-
 </div>
 {% endblock %}

@@ -1,14 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container-fluid form-container mt-4">
-  <div class="row justify-content-center">
-    <div class="col form-area">
-      <h5 class="mb-1">Record Deposit</h5>
-      <p class="text-muted mb-3">{{ customer.full_name }} • Balance: UGX {{ customer.balance|floatformat:0 }}</p>
+<div class="form-shell">
+  <div class="form-hero">
+    <h1>Record Deposit</h1>
+    <p>{{ customer.full_name }} · Balance: UGX {{ customer.balance|floatformat:0 }}</p>
+  </div>
 
+  <div class="card-custom form-card">
+    <div class="card-custom-body">
       <form method="post">
         {% csrf_token %}
-        <div class="row g-3">
+        <div class="row g-4">
           <div class="col-md-6">
             <label class="form-label">Amount (UGX)</label>
             <input type="number" name="amount" step="0.01" min="0" class="form-control" required>
@@ -19,8 +21,8 @@
           </div>
         </div>
 
-        <div class="d-flex justify-content-center gap-3 mt-4">
-          <button class="btn btn-warning" type="submit"><i class="bi bi-check-circle"></i> Save</button>
+        <div class="form-actions">
+          <button class="btn btn-warning" type="submit"><i class="bi bi-check-circle me-1"></i>Save</button>
           <a class="btn btn-outline-secondary" href="{% url 'deposit_customer_detail' customer.pk %}">Cancel</a>
         </div>
       </form>

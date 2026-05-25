@@ -16,13 +16,19 @@ Including another URLconf
 """
 
 from django.contrib import admin
+from django.contrib.auth.views import LoginView
 from django.urls import path
 from nyondo import views as web_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    # Home page
     path("", web_views.dashboard, name="dashboard"),
+    path("login/", web_views.login_view, name="login"),
+    path("logout/", web_views.logout_view, name="logout"),
+    path("users/", web_views.user_list, name="user_list"),
+path("users/new/", web_views.user_create, name="user_create"),
+    # Home page
+    
     # Path for the add product view
     path("add_product/", web_views.product_create, name="add_product"),
     # Default path to display the form and products

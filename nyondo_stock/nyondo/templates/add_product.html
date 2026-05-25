@@ -1,35 +1,32 @@
-{% extends 'base.html' %} {% block content %}
-<div class="container-fluid form-container">
-    <div class="row justify-content-center stock-register-layout">
-        <div class="col form-area">
-            <!-- Form Area -->
+{% extends 'base.html' %}
+{% block content %}
+<div class="form-shell">
+    <div class="form-hero">
+        <h1 style="font-size:large;">Add New Product</h1>
+        <p>Create a new stock item</p>
+    </div>
 
+    <div class="card-custom form-card">
+        <div class="card-custom-body">
             <form action="{% url 'add_product' %}" method="post">
                 {% csrf_token %}
-                <div class="form-heading">
-                    <h5>Add New Product</h5>
-                </div>
-                <div class="row my-4">
-                    <div class="col">
+                <div class="row g-4">
+                    <div class="col-md-6">
                         <label for="product_name" class="form-label">Product Name</label>
                         <input type="text" name="product_name" class="form-control" />
                     </div>
-
-                    <div class="col">
+                    <div class="col-md-3">
                         <label for="category" class="form-label">Category</label>
                         <select class="form-select" name="category">
                             <option value="">Select category</option>
-                              {% for c in categories %}
-                                <option value="{{ c.id }}">{{ c.name }}</option>
-                              {% endfor %}
-                            
+                            {% for c in categories %}
+                            <option value="{{ c.id }}">{{ c.name }}</option>
+                            {% endfor %}
                         </select>
                     </div>
-
-                   
-                    <div class="col">
+                    <div class="col-md-3">
                         <label for="unit" class="form-label">Unit</label>
-                        <select name="unit" required>
+                        <select name="unit" class="form-select" required>
                             <option value="">Select unit</option>
                             <option value="bag">Bag</option>
                             <option value="piece">Piece</option>
@@ -38,37 +35,26 @@
                             <option value="roll">Roll</option>
                         </select>
                     </div>
-                </div>
-
-                <div class="row my-4 g-3">
-                    <div class="col">
-                        <label for="unit_cost" class="form-label">Unit Cost(UGX)</label>
+                    <div class="col-md-4">
+                        <label for="unit_cost" class="form-label">Unit Cost (UGX)</label>
                         <input type="number" name="unit_cost" class="form-control" />
                     </div>
-                    <div class="col">
-                        <label for="unit_price" class="form-label">Unit Price(UGX)</label>
+                    <div class="col-md-4">
+                        <label for="unit_price" class="form-label">Unit Price (UGX)</label>
                         <input type="number" name="unit_price" class="form-control" />
                     </div>
-
-                    <div class="col">
-                        <label for="reorder_level" class="form-label">Reorder level</label>
+                    <div class="col-md-4">
+                        <label for="reorder_level" class="form-label">Reorder Level</label>
                         <input type="number" name="reorder_level" class="form-control" />
                     </div>
                 </div>
 
-                <div class="row g-2">
-                    <div class="d-flex justify-content-center gap-3">
-                        <button type="submit" class="btn btn-primary">Save Stock</button>
-                        <a href="" class="btn btn-outline-danger">Cancel</a>
-                    </div>
-                    <div class="col"></div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Stock</button>
+                    <a href="{% url 'product_list' %}" class="btn btn-outline-danger">Cancel</a>
                 </div>
             </form>
         </div>
     </div>
-
-    <!-- Stock list goes here -->
-    
 </div>
-
 {% endblock %}

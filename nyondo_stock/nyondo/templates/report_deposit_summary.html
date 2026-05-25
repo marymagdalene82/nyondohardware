@@ -1,20 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container-fluid mt-4">
-  <h4 class="mb-3">Deposit Scheme Summary Report</h4>
+<div class="report-shell">
+  <div class="report-hero">
+    <div class="dashboard-toolbar mb-0">
+      <div>
+        <h1 class="mb-1">Deposit Scheme Summary Report</h1>
+        <p>Track deposits, pickups, and the resulting net movement in customer balances.</p>
+      </div>
+    </div>
+  </div>
 
-  <div class="card-custom mb-4">
+  <div class="card-custom filter-card mb-4">
     <div class="card-custom-body">
-      <form method="get" class="row g-3 align-items-end">
-        <div class="col-md-4">
+      <form method="get" class="report-filter-grid align-items-end">
+        <div>
           <label class="form-label">From</label>
           <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
         </div>
-        <div class="col-md-4">
+        <div>
           <label class="form-label">To</label>
           <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
         </div>
-        <div class="col-md-4">
+        <div class="d-flex align-items-end">
           <button class="btn btn-warning w-100" type="submit">
             <i class="bi bi-funnel me-1"></i>Filter
           </button>
@@ -23,40 +30,26 @@
     </div>
   </div>
 
-  <div class="row g-3 mb-4">
-    <div class="col-md-4">
-      <div class="card-custom stock-table-card">
-        <div class="card-custom-body">
-          <div class="text-muted">Deposits Received</div>
-          <div class="h5 mb-0">UGX {{ deposits_total|floatformat:0 }}</div>
-        </div>
-      </div>
+  <div class="metric-grid mb-4">
+    <div class="metric-card">
+      <div class="metric-label">Deposits Received</div>
+      <div class="metric-value">UGX {{ deposits_total|floatformat:0 }}</div>
     </div>
-
-    <div class="col-md-4">
-      <div class="card-custom stock-table-card">
-        <div class="card-custom-body">
-          <div class="text-muted">Pickups (Deducted)</div>
-          <div class="h5 mb-0">UGX {{ pickups_total|floatformat:0 }}</div>
-        </div>
-      </div>
+    <div class="metric-card">
+      <div class="metric-label">Pickups Deducted</div>
+      <div class="metric-value">UGX {{ pickups_total|floatformat:0 }}</div>
     </div>
-
-    <div class="col-md-4">
-      <div class="card-custom stock-table-card">
-        <div class="card-custom-body">
-          <div class="text-muted">Net Change</div>
-          <div class="h5 mb-0">UGX {{ net_change|floatformat:0 }}</div>
-          <div class="small text-muted">Deposits - Pickups</div>
-        </div>
-      </div>
+    <div class="metric-card metric-card--highlight">
+      <div class="metric-label">Net Change</div>
+      <div class="metric-value">UGX {{ net_change|floatformat:0 }}</div>
+      <div class="metric-meta">Deposits minus pickups</div>
     </div>
   </div>
 
   <div class="card-custom stock-table-card">
     <div class="card-custom-body stock-table-body">
       <div class="table-responsive">
-        <table class="table table-custom stock-table">
+        <table class="table table-custom stock-table mb-0">
           <thead class="stock-table-head">
             <tr>
               <th>Date</th>
@@ -89,6 +82,5 @@
       </div>
     </div>
   </div>
-
 </div>
 {% endblock %}

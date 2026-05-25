@@ -1,18 +1,21 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container-fluid form-container">
-  <div class="row justify-content-center stock-register-layout">
-    <div class="col form-area">
+<div class="form-shell">
+  <div class="form-hero">
+    <h1>Delete Product</h1>
+    <p>This action will remove <strong>{{ product.product_name }}</strong> from the catalog.</p>
+  </div>
 
-      <h5>Delete Product</h5>
-      <p>Are you sure you want to delete <strong>{{ product.product_name }}</strong>?</p>
-
+  <div class="card-custom form-card">
+    <div class="card-custom-body">
       <form method="post">
         {% csrf_token %}
-        <button class="btn btn-danger" type="submit">Yes, delete</button>
-        <a class="btn btn-outline-secondary" href="{% url 'product_list' %}">Cancel</a>
+        <p class="form-copy mb-0">Are you sure you want to delete <strong>{{ product.product_name }}</strong>?</p>
+        <div class="form-actions">
+          <button class="btn btn-danger" type="submit">Yes, delete</button>
+          <a class="btn btn-outline-secondary" href="{% url 'product_list' %}">Cancel</a>
+        </div>
       </form>
-
     </div>
   </div>
 </div>

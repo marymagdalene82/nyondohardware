@@ -1,35 +1,46 @@
+{% load static %}
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login | Nyondo</title>
-   
-    <link rel="stylesheet" href="../static/login.css" />
-    <!-- Basic Icons -->
+
+    <link rel="stylesheet" href="{% static 'login.css' %}" />
+
     <link
       href="https://cdn.boxicons.com/3.0.8/fonts/basic/boxicons.min.css"
       rel="stylesheet"
     />
-    
   </head>
 
   <body>
     <div class="wrapper">
-      <form action="POST">
+      <form method="POST">
+        {% csrf_token %}
         <h1>Login</h1>
+
         <div class="input-box">
-          <input type="text" placeholder="Username" required />
+          <input type="text" name="username" placeholder="Username" required />
           <i class="bx bx-user"></i>
         </div>
+
         <div class="input-box">
-          <input type="password" placeholder="Password" required />
+          <input type="password" name="password" placeholder="Password" required />
           <i class="bx bx-lock"></i>
         </div>
+
         <div class="remember-forgot">
-          <label><input type="checkbox" />Remember me</label>
+          <label><input type="checkbox" name="remember" />Remember me</label>
           <a href="#">Forgot password?</a>
         </div>
+
+        {% if error %}
+          <p style="color: #ffdddd; background:#7a0000; padding:8px; border-radius:8px;">
+            {{ error }}
+          </p>
+        {% endif %}
+
         <button type="submit" class="btn">Login</button>
       </form>
     </div>
