@@ -1,6 +1,6 @@
 
 {% extends "base.html" %}
-{% load humanize %}
+{% load humanize static %}
 {% block subtitle %}Dashboard{% endblock %}
 {% block content %}
   
@@ -12,19 +12,19 @@
 
   <div class="metric-grid mb-2">
     <div class="metric-card metric-card--highlight">
-      <div class="metric-label">Sales Today</div>
+      <div class="metric-label">Sales Today<img src="{% static 'sale.svg' %}" alt="Sales" class="icon icon--metric ms-2"></div>
       <div class="metric-value">{{ sales_today_count }}</div>
     </div>
     <div class="metric-card">
-      <div class="metric-label">Revenue Today</div>
+      <div class="metric-label">Revenue Today<img src="{% static 'revenue.svg' %}" alt="Revenue" class="icon icon--metric ms-2"></div>
       <div class="metric-value">UGX {{ sales_today_total|floatformat:0|intcomma  }}</div>
     </div>
     <div class="metric-card">
-      <div class="metric-label">Transport Today</div>
+      <div class="metric-label">Transport Today<img src="{% static 'transport.svg' %}" alt="Transport" class="icon icon--metric ms-2"></div>
       <div class="metric-value">UGX {{ transport_today_total|floatformat:0|intcomma  }}</div>
     </div>
     <div class="metric-card">
-      <div class="metric-label">Items Sold Today</div>
+      <div class="metric-label">Items Sold Today<img src="{% static 'items.svg' %}" alt="Items sold" class="icon icon--metric ms-2"></div>
       <div class="metric-value">{{ items_today_qty|intcomma  }}</div>
     </div>
   </div>

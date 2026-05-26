@@ -2,34 +2,82 @@
 {% block content %}
 <div class="form-shell">
   <div class="form-hero">
-    <h1>Register Deposit Customer</h1>
-    <p>Add a customer to the deposit scheme and keep their details ready for pickup and top-up actions.</p>
+    <h1 class="mb-1" style="font-size:large;">Register Deposit Customer</h1>
+    <p>Add a customer to the deposit scheme.</p>
   </div>
 
   <div class="card-custom form-card">
     <div class="card-custom-body">
       <form method="post">
         {% csrf_token %}
+
+        {# show Django messages #}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+
         <div class="row g-4">
           <div class="col-md-6">
-            <label class="form-label">Full Name (as on NIN)</label>
-            <input name="full_name" class="form-control" required>
+            <label class="form-label">Full Name</label>
+            <input
+              name="full_name"
+              class="form-control"
+              value="{{ form_data.full_name|default:'' }}"
+            >
+            {% if errors.full_name %}
+              <div class="text-danger small">{{ errors.full_name }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-6">
             <label class="form-label">NIN</label>
-            <input name="nin" class="form-control" required>
+            <input
+              name="nin"
+              class="form-control"
+              value="{{ form_data.nin|default:'' }}"
+            >
+            {% if errors.nin %}
+              <div class="text-danger small">{{ errors.nin }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-6">
             <label class="form-label">Phone</label>
-            <input name="phone" class="form-control" placeholder="07XXXXXXXX" required>
+            <input
+              name="phone"
+              class="form-control"
+              placeholder="07XXXXXXXX"
+              value="{{ form_data.phone|default:'' }}"
+            >
+            {% if errors.phone %}
+              <div class="text-danger small">{{ errors.phone }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-6">
             <label class="form-label">Occupation</label>
-            <input name="occupation" class="form-control">
+            <input
+              name="occupation"
+              class="form-control"
+              value="{{ form_data.occupation|default:'' }}"
+            >
+            {% if errors.occupation %}
+              <div class="text-danger small">{{ errors.occupation }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-12">
             <label class="form-label">Address</label>
-            <input name="address" class="form-control">
+            <input
+              name="address"
+              class="form-control"
+              value="{{ form_data.address|default:'' }}"
+            >
+            {% if errors.address %}
+              <div class="text-danger small">{{ errors.address }}</div>
+            {% endif %}
           </div>
         </div>
 

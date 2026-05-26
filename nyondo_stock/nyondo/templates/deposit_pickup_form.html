@@ -3,27 +3,50 @@
 <div class="form-shell">
   <div class="form-hero">
     <h1>Pickup Goods</h1>
-    <p>{{ customer.full_name }} · Balance: UGX {{ customer.balance|floatformat:0 }}</p>
+    <p>{{ customer.full_name }} · Balance: UGX {{ balance|floatformat:0 }}</p>
   </div>
 
   <div class="card-custom form-card">
     <div class="card-custom-body">
       <form method="post">
         {% csrf_token %}
+
+        {# show Django messages #}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+
         <div class="row g-4 align-items-end">
           <div class="col-md-7">
             <label class="form-label">Product (eligible only)</label>
-            <select name="product" class="form-select" required>
+            <select name="product" class="form-select">
               <option value="">Select product</option>
               {% for p in products %}
-              <option value="{{ p.id }}">{{ p.product_name }}{% if p.variant %} - {{ p.variant }}{% endif %} (Stock: {{ p.stock }})</option>
+                <option value="{{ p.id }}" {% if form_data.product == p.id|stringformat:"s" %}selected{% endif %}>
+                  {{ p.product_name }}{% if p.variant %} - {{ p.variant }}{% endif %} (Stock: {{ p.stock }})
+                </option>
               {% endfor %}
             </select>
+            {% if errors.product %}
+              <div class="text-danger small">{{ errors.product }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-3">
             <label class="form-label">Quantity</label>
-            <input type="number" name="quantity" class="form-control" min="1" step="1" required>
+            <input
+              type="number"
+              name="quantity"
+              class="form-control"
+              value="{{ form_data.quantity|default:'' }}"
+            >
+            {% if errors.quantity %}
+              <div class="text-danger small">{{ errors.quantity }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-2">
             <button class="btn btn-warning w-100" type="submit"><i class="bi bi-check-circle"></i></button>
           </div>

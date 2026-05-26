@@ -1,10 +1,11 @@
 {% extends "base.html" %}
+{% load humanize %}
 {% block content %}
 <div class="report-shell">
   <div class="page-hero">
-    <div class="dashboard-toolbar mb-0">
+    <div class="dashboard-toolbar mb-3">
       <div>
-        <h1 class="mb-1">{{ supplier.name }}</h1>
+        <h1 class="mb-1" style="font-size:large;">{{ supplier.name }}</h1>
         <p>{{ supplier.phone }}{% if supplier.contact_person %} · {{ supplier.contact_person }}{% endif %}</p>
       </div>
       <div class="report-actions">

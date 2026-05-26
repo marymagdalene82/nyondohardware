@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="report-shell">
-  <div class="page-hero">
+<div class="report-shell ">
+  <div class="page-hero mb-5">
     <div class="dashboard-toolbar mb-0">
       <div>
-        <h1 class="mb-1">Suppliers</h1>
+        <h1 class="mb-1" style="font-size:large;">Suppliers</h1>
         <p>Manage supplier records and jump into balances or updates quickly.</p>
       </div>
       <div class="report-actions">
@@ -13,18 +13,18 @@
     </div>
   </div>
 
-  <div class="card-custom filter-card mb-4">
-    <div class="card-custom-body">
+  <div class="card-custom filter-card mb-2 mt-5">
+    
       <form method="get" class="report-filter-grid align-items-end">
         <div>
-          <label class="form-label">Search</label>
+          
           <input name="q" class="form-control" value="{{ q }}" placeholder="Name, phone, contact person">
         </div>
         <div>
-          <button class="btn btn-warning w-100" type="submit"><i class="bi bi-search me-1"></i>Search</button>
+          <button class="btn btn-outline-dark w-20" type="submit"><i class="bi bi-search me-1"></i>Search</button>
         </div>
       </form>
-    </div>
+
   </div>
 
   <div class="card-custom stock-table-card">

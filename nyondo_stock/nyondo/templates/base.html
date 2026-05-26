@@ -1,5 +1,5 @@
 {% load static %}
-{% load roles %}
+
 <!doctype html>
 <html lang="en">
 
@@ -45,7 +45,7 @@
                 <ul class="nav flex-column">
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}"
-                            href="{% url 'product_list' %}"><i class="bi bi-plus-circle"></i>Stock</a>
+                            href="{% url 'product_list' %}"><i class="bi bi-plus-circle"></i>Products</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'stock_entry_list' %}active{% endif %}"
@@ -60,31 +60,18 @@
                         <a class="nav-link {% if request.resolver_match.url_name == 'sale_list' %}active{% endif %}"
                             aria-current="page" href="{% url 'sale_list' %}"><i class="bi bi-building"></i>Sales</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'sale_create' %}active{% endif %}"
-                            aria-current="page" href="{% url 'sale_create' %}"><i class="bi bi-building"></i>New
-                            Sale</a>
-                    </li>
+
                 </ul>
 
                 <div class="sidebar-section-label">PEOPLE</div>
                 <ul class="nav flex-column">
-                    
+
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'deposit_customer_list' %}active{% endif %}"
                             href="{% url 'deposit_customer_list' %}">
                             <i class="bi bi-wallet2"></i> Deposit Customers
                         </a>
                     </li>
-                 
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'user_list' %}active{% endif %}"
-                            href="{% url 'user_list' %}">
-                            <i class="bi bi-people"></i>User Management
-                        </a>
-                    </li>
-                  
-
                 </ul>
                 <div class="sidebar-section-label">FINANCE</div>
                 <ul class="nav flex-column">
@@ -93,11 +80,7 @@
                             aria-current="page" href="{% url 'supplier_list' %}"><i
                                 class="bi bi-building"></i>Suppliers</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'supplier_credit_report' %}active{% endif %}"
-                            aria-current="page" href="{% url 'supplier_credit_report' %}"><i
-                                class="bi bi-building"></i>Reports</a>
-                    </li>
+                   
 
                 </ul>
 
@@ -116,19 +99,19 @@
     <div class="container-fluid main-wrapper">
         <div class="topbar">
             <div class="salutations topbar-copy topbar-title">
-                
+
                 <h2>{% block subtitle %}{% endblock %}</h2>
 
-            
+
             </div>
             <div class="topbar-user">
                 <div class="user-info">
                     <h6>Welcome,{{ user.get_full_name|default:"User" }}</h6>
-                    <small>{{ user|job_title }}</small>
-                   
+                    <small>{% if user.is_superuser %}Accounts/Admin{% else %}{{ user.username }}{% endif %}</small>
+
                 </div>
-                <!-- <div class="avatar">RA</div> -->
                 
+
             </div>
         </div>
         {% block content %} {% endblock %}

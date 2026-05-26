@@ -4,8 +4,9 @@
   <div class="form-hero">
     <div class="dashboard-toolbar mb-0">
       <div>
-      <h1 style="font-size:large;">Add Inventory</h1>
-      <p>Manage your inventory items</p></div>
+        <h1 style="font-size:large;">Add Inventory</h1>
+        <p>Manage your inventory items</p>
+      </div>
       <a href="{% url 'stock_entry_list' %}" class="btn btn-warning">Go to Stock entry list</a>
     </div>
   </div>
@@ -13,46 +14,111 @@
   <div class="card-custom form-card">
     <div class="card-custom-body">
       <div class="section-title mb-4">Product Information</div>
+
       <form method="post" action="{% url 'add_stock' %}">
         {% csrf_token %}
+
+        {# show Django messages #}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+
         <div class="row g-4">
           <div class="col-md-4">
             <label class="form-label">Product</label>
             <select name="product" class="form-select">
               <option value="" selected disabled>Select Product</option>
-              {% for p in products %}<option value="{{ p.id }}">{{ p.product_name }}</option>{% endfor %}
+              {% for p in products %}
+                <option value="{{ p.id }}" {% if form_data.product == p.id|stringformat:"s" %}selected{% endif %}>
+                  {{ p.product_name }}
+                </option>
+              {% endfor %}
             </select>
+            {% if errors.product %}
+              <div class="text-danger small">{{ errors.product }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-4">
             <label class="form-label">Supplier</label>
             <select name="supplier" class="form-select">
               <option value="" selected disabled>Select Supplier</option>
-              {% for s in suppliers %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+              {% for s in suppliers %}
+                <option value="{{ s.id }}" {% if form_data.supplier == s.id|stringformat:"s" %}selected{% endif %}>
+                  {{ s.name }}
+                </option>
+              {% endfor %}
             </select>
+            {% if errors.supplier %}
+              <div class="text-danger small">{{ errors.supplier }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-4">
             <label class="form-label">Quantity Received</label>
-            <input type="number" name="quantity" class="form-control" placeholder="Enter quantity" />
+            <input
+              type="number"
+              name="quantity"
+              class="form-control"
+              placeholder="Enter quantity"
+              value="{{ form_data.quantity|default:'' }}"
+            />
+            {% if errors.quantity %}
+              <div class="text-danger small">{{ errors.quantity }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-4">
             <label class="form-label">Unit Cost (UGX)</label>
-            <input type="number" name="unit_cost" class="form-control" placeholder="Enter unit cost" />
+            <input
+              type="number"
+              name="unit_cost"
+              class="form-control"
+              placeholder="Enter unit cost"
+              value="{{ form_data.unit_cost|default:'' }}"
+            />
+            {% if errors.unit_cost %}
+              <div class="text-danger small">{{ errors.unit_cost }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-4">
             <label class="form-label">Selling Price (UGX)</label>
-            <input type="number" name="unit_price" class="form-control" placeholder="Enter selling price" />
+            <input
+              type="number"
+              name="unit_price"
+              class="form-control"
+              placeholder="Enter selling price"
+              value="{{ form_data.unit_price|default:'' }}"
+            />
+            {% if errors.unit_price %}
+              <div class="text-danger small">{{ errors.unit_price }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-4">
             <label class="form-label">Payment Type</label>
             <select name="is_credit" class="form-select">
-              <option selected disabled>Select payment type</option>
-              <option value="False">Cash</option>
-              <option value="True">Credit</option>
+              <option value="" selected disabled>Select payment type</option>
+              <option value="False" {% if form_data.is_credit == "False" %}selected{% endif %}>Cash</option>
+              <option value="True" {% if form_data.is_credit == "True" %}selected{% endif %}>Credit</option>
             </select>
           </div>
+
           <div class="col-md-4">
             <label class="form-label">Amount Paid (UGX)</label>
-            <input type="number" name="amount_paid" class="form-control" placeholder="Enter amount paid" />
+            <input
+              type="number"
+              name="amount_paid"
+              class="form-control"
+              placeholder="Enter amount paid"
+              value="{{ form_data.amount_paid|default:'' }}"
+            />
+            {% if errors.amount_paid %}
+              <div class="text-danger small">{{ errors.amount_paid }}</div>
+            {% endif %}
           </div>
         </div>
 

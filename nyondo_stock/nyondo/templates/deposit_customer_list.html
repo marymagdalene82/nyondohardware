@@ -4,8 +4,8 @@
   <div class="page-hero">
     <div class="dashboard-toolbar mb-0">
       <div>
-        <h1 class="mb-1">Deposit Customers</h1>
-        <p>Keep the deposit scheme organized and access balances fast.</p>
+        <h1 class="mb-1" style="font-size:large;">Deposit Customers</h1>
+        <p>Keep your deposit scheme organized and access balances fast.</p>
       </div>
       <div class="report-actions">
         <a href="{% url 'deposit_customer_create' %}" class="btn btn-warning"><i class="bi bi-plus-lg me-1"></i>New Customer</a>
@@ -13,18 +13,18 @@
     </div>
   </div>
 
-  <div class="card-custom filter-card mb-4">
-    <div class="card-custom-body">
+  <div class="card-custom filter-card mb-2 mt-5">
+    
       <form method="get" class="report-filter-grid align-items-end">
         <div>
-          <label class="form-label">Search</label>
-          <input type="text" name="q" class="form-control" value="{{ q }}" placeholder="Name, NIN or phone">
+         
+          <input type="text" name="q" class="form-control" value="{{ q }}" placeholder="Name, phone, NIN">
         </div>
         <div>
-          <button class="btn btn-warning w-100" type="submit"><i class="bi bi-search me-1"></i>Search</button>
+          <button class="btn btn-outline-dark w-20" type="submit"><i class="bi bi-search me-1"></i>Search</button>
         </div>
       </form>
-    </div>
+   
   </div>
 
   <div class="card-custom stock-table-card">

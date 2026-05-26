@@ -2,7 +2,7 @@
 {% block content %}
 <div class="form-shell">
   <div class="form-hero">
-    <h1>{% if mode == "edit" %}Edit Supplier{% else %}New Supplier{% endif %}</h1>
+    <h1 class="mb-1" style="font-size:large;">{% if mode == "edit" %}Edit Supplier{% else %}New Supplier{% endif %}</h1>
     <p>Keep supplier contact information tidy and up to date.</p>
   </div>
 
@@ -10,18 +10,46 @@
     <div class="card-custom-body">
       <form method="post">
         {% csrf_token %}
+
+        {# show Django messages #}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+
         <div class="row g-4">
           <div class="col-md-6">
             <label class="form-label">Name</label>
-            <input name="name" class="form-control" value="{{ supplier.name|default:'' }}" required>
+            <input
+              name="name"
+              class="form-control"
+              value="{% if form_data %}{{ form_data.name|default:'' }}{% elif supplier %}{{ supplier.name|default:'' }}{% endif %}"
+            >
+            {% if errors.name %}
+              <div class="text-danger small">{{ errors.name }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-6">
             <label class="form-label">Phone</label>
-            <input name="phone" class="form-control" value="{{ supplier.phone|default:'' }}" required>
+            <input
+              name="phone"
+              class="form-control"
+              value="{% if form_data %}{{ form_data.phone|default:'' }}{% elif supplier %}{{ supplier.phone|default:'' }}{% endif %}"
+            >
+            {% if errors.phone %}
+              <div class="text-danger small">{{ errors.phone }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-12">
             <label class="form-label">Contact Person</label>
-            <input name="contact_person" class="form-control" value="{{ supplier.contact_person|default:'' }}">
+            <input
+              name="contact_person"
+              class="form-control"
+              value="{% if form_data %}{{ form_data.contact_person|default:'' }}{% elif supplier %}{{ supplier.contact_person|default:'' }}{% endif %}"
+            >
           </div>
         </div>
 

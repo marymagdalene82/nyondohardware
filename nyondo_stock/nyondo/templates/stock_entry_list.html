@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load humanize %}
+{% load humanize static %}
 {% block subtitle %}Stock List{% endblock %}
 
 {% block content %}
@@ -20,7 +20,7 @@
                     <div class="col-md-3">
                         <div class="card-custom stock-table-card h-100">
                             <div class="card-custom-body">
-                                <div class="text-muted metric-label">Entries Count</div>
+                                <div class="text-muted metric-label">Entries Count<img src="{% static 'report-count.svg' %}" alt="Revenue" class="icon icon--metric ms-2"></div>
                                 <div class="h3 mb-0 mt-3" style="color:rgb(32, 29, 102);font-size:1.5rem;">{{ totals.entries_count|intcomma }}</div>
 
                             </div>
@@ -30,7 +30,7 @@
                     <div class="col-md-3">
                         <div class="card-custom stock-table-card h-100">
                             <div class="card-custom-body">
-                                <div class="text-muted metric-label">Total Quantity</div>
+                                <div class="text-muted metric-label">Total Quantity<img src="{% static 'quantity.png' %}" alt="Revenue" class="icon icon--metric ms-2"></div>
                                 <div class="h3 mb-0 mt-3" style="color:rgb(32, 29, 102);font-size:1.5rem;">{{ totals.total_quantity|floatformat:0|intcomma }}</div>
                                 
                             </div>
@@ -40,7 +40,7 @@
                     <div class="col-md-3">
                         <div class="card-custom stock-table-card h-100">
                             <div class="card-custom-body">
-                                <div class="text-muted metric-label">Total Stock Value</div>
+                                <div class="text-muted metric-label">Total Stock Value<img src="{% static 'revenue.svg' %}" alt="Revenue" class="icon icon--metric ms-2"></div>
                                 <div class="h3 mb-0 mt-3" style="color:rgb(32, 29, 102);font-size:1.5rem;">UGX {{ totals.total_value|floatformat:0|intcomma }}</div>
                                 
                             </div>
@@ -50,7 +50,7 @@
                     <div class="col-md-3">
                         <div class="card-custom stock-table-card h-100">
                             <div class="card-custom-body">
-                                <div class="text-muted metric-label">Total Balance</div>
+                                <div class="text-muted metric-label">Total Balance<img src="{% static 'balance.svg' %}" alt="Revenue" class="icon icon--metric ms-2"></div>
                                 <div class="h3 mb-0 mt-3" style="color:rgb(32, 29, 102); font-size:1.5rem;">UGX {{ totals.total_balance|floatformat:0|intcomma }}</div>
                                 
                             </div>

@@ -1,15 +1,15 @@
 {% extends "base.html" %}
+{% load humanize %}
 {% block content %}
 <div class="report-shell">
-  <div class="page-hero">
+  <div class="page-hero mb-3">
     <div class="dashboard-toolbar mb-0">
       <div>
-        <h1 class="mb-1">{{ product.product_name }}</h1>
+        <h1 class="mb-1" style="font-size:large;">{{ product.product_name }}</h1>
         <p>{{ product.category.name }}{% if product.variant %} · {{ product.variant }}{% endif %}</p>
       </div>
       <div class="report-actions">
         <a class="btn btn-outline-primary" href="{% url 'product_edit' product.pk %}"><i class="bi bi-pencil me-1"></i>Edit</a>
-        <a class="btn btn-outline-danger" href="{% url 'product_delete' product.pk %}"><i class="bi bi-trash me-1"></i>Delete</a>
         <a class="btn btn-outline-secondary" href="{% url 'product_list' %}">Back</a>
       </div>
     </div>
@@ -23,8 +23,8 @@
   </div>
 
   <div class="metric-grid mb-4">
-    <div class="metric-card"><div class="metric-label">Unit Cost</div><div class="metric-value">UGX {{ product.unit_cost|floatformat:0 }}</div></div>
-    <div class="metric-card"><div class="metric-label">Selling Price</div><div class="metric-value">UGX {{ product.unit_price|floatformat:0 }}</div></div>
+    <div class="metric-card"><div class="metric-label">Unit Cost</div><div class="metric-value">UGX {{ product.unit_cost|floatformat:0|intcomma }}</div></div>
+    <div class="metric-card"><div class="metric-label">Selling Price</div><div class="metric-value">UGX {{ product.unit_price|floatformat:0|intcomma }}</div></div>
     <div class="metric-card"><div class="metric-label">Date Added</div><div class="metric-value">{{ product.date_added|date:"d M Y" }}</div></div>
     <div class="metric-card"><div class="metric-label">Updated</div><div class="metric-value">{{ product.updated_at|date:"d M Y" }}</div></div>
   </div>

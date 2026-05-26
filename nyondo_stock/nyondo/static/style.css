@@ -364,6 +364,18 @@ h6 {
   
 }
 
+.metric-label img.icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex: 0 0 auto;
+  vertical-align: middle;
+}
+
+.metric-label .icon--metric {
+  margin-left: 8px;
+}
+
 .metric-value {
   color: #0f172a;
   font-size: 20px;

@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load humanize static %}
+{% block subtitle %}Sale{% endblock %}
 {% block content %}
 <div class="report-shell">
   <div class="page-hero">
@@ -13,10 +15,10 @@
     </div>
   </div>
 
-  <div class="metric-grid mb-4">
-    <div class="metric-card"><div class="metric-label">Items Total</div><div class="metric-value">UGX {{ sale.total_amount|floatformat:0 }}</div></div>
-    <div class="metric-card"><div class="metric-label">Transport</div><div class="metric-value">UGX {{ sale.transport_charge|floatformat:0 }}</div></div>
-    <div class="metric-card metric-card--highlight"><div class="metric-label">Grand Total</div><div class="metric-value">UGX {{ sale.total_amount|floatformat:0 }}</div></div>
+  <div class="metric-grid mb-4 mt-3">
+    <div class="metric-card"><div class="metric-label">Items Total</div><div class="metric-value">UGX {{ sale.total_amount|floatformat:0|intcomma }}</div></div>
+    <div class="metric-card"><div class="metric-label">Transport</div><div class="metric-value">UGX {{ sale.transport_charge|floatformat:0|intcomma }}</div></div>
+    <div class="metric-card metric-card--highlight"><div class="metric-label">Grand Total</div><div class="metric-value">UGX {{ sale.total_amount|floatformat:0|intcomma }}</div></div>
   </div>
 
   <div class="section-title"><h5>Items</h5></div>
@@ -37,8 +39,8 @@
             <tr>
               <td>{{ i.product.product_name }}</td>
               <td>{{ i.quantity }}</td>
-              <td>UGX {{ i.unit_price|floatformat:0 }}</td>
-              <td>UGX {{ i.subtotal|floatformat:0 }}</td>
+              <td>UGX {{ i.unit_price|floatformat:0|intcomma }}</td>
+              <td>UGX {{ i.subtotal|floatformat:0|intcomma }}</td>
             </tr>
             {% empty %}
             <tr><td colspan="4" class="text-center py-4">No items.</td></tr>

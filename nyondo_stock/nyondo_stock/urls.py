@@ -25,8 +25,7 @@ urlpatterns = [
     path("", web_views.dashboard, name="dashboard"),
     path("login/", web_views.login_view, name="login"),
     path("logout/", web_views.logout_view, name="logout"),
-    path("users/", web_views.user_list, name="user_list"),
-path("users/new/", web_views.user_create, name="user_create"),
+  
     # Home page
     
     # Path for the add product view

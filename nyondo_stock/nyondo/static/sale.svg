@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" id="sales">
+  <g transform="translate(0 -1026.362)">
+    <circle cx="37.045" cy="28.409" r="12.5" fill="#50b748" fill-rule="evenodd" transform="translate(-25.527 1009.817)scale(1.04)"></circle>
+    <path fill="#10a711" d="M11.951 25.951a13 13 0 0 0 .13.016A13 13 0 0 0 13 26a13 13 0 0 0 1.297-.064 13 13 0 0 0 1.285-.196 13 13 0 0 0 1.26-.32 13 13 0 0 0 1.22-.445 13 13 0 0 0 1.17-.567 13 13 0 0 0 1.108-.68 13 13 0 0 0 1.035-.785 13 13 0 0 0 .951-.886 13 13 0 0 0 .858-.977 13 13 0 0 0 .755-1.057 13 13 0 0 0 .647-1.127 13 13 0 0 0 .531-1.185 13 13 0 0 0 .408-1.234 13 13 0 0 0 .286-1.268 13 13 0 0 0 .156-1.29A13 13 0 0 0 26 13a13 13 0 0 0-.053-1.053L21 7H5v12l6.951 6.951z" color="#000" font-family="sans-serif" font-weight="400" style="line-height:normal;text-indent:0;text-align:start;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000;text-transform:none;block-progression:tb;isolation:auto;mix-blend-mode:normal" transform="translate(0 1026.362)"></path>
+    <path fill="#fff" d="M0 2v12h16V2H0Zm1 1h14v10h-2V8h-3v5H9V9H6v4H5V5H2v8H1V3Zm2 3h1v7H3V6zm8 3h1v4h-1V9zm-4 1h1v3H7v-3z" color="#000" font-family="sans-serif" font-weight="400" overflow="visible" style="line-height:normal;text-indent:0;text-align:start;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000;text-transform:none;block-progression:tb;isolation:auto;mix-blend-mode:normal" transform="translate(5 1031.362)"></path>
+  </g>
+</svg>

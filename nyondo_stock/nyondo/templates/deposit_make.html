@@ -3,21 +3,44 @@
 <div class="form-shell">
   <div class="form-hero">
     <h1>Record Deposit</h1>
-    <p>{{ customer.full_name }} · Balance: UGX {{ customer.balance|floatformat:0 }}</p>
+    <p>{{ customer.full_name }} · Balance: UGX {{ balance|floatformat:0 }}</p>
   </div>
 
   <div class="card-custom form-card">
     <div class="card-custom-body">
       <form method="post">
         {% csrf_token %}
+
+        {# show Django messages #}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+
         <div class="row g-4">
           <div class="col-md-6">
             <label class="form-label">Amount (UGX)</label>
-            <input type="number" name="amount" step="0.01" min="0" class="form-control" required>
+            <input
+              type="number"
+              name="amount"
+              step="0.01"
+              class="form-control"
+              value="{{ form_data.amount|default:'' }}"
+            >
+            {% if errors.amount %}
+              <div class="text-danger small">{{ errors.amount }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-6">
             <label class="form-label">Notes (optional)</label>
-            <input name="notes" class="form-control" placeholder="e.g. May salary deposit">
+            <input
+              name="notes"
+              class="form-control"
+              placeholder="e.g. May salary deposit"
+              value="{{ form_data.notes|default:'' }}"
+            >
           </div>
         </div>
 

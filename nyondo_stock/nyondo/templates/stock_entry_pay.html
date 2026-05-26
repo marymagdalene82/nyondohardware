@@ -10,9 +10,26 @@
     <div class="card-custom-body">
       <form method="post">
         {% csrf_token %}
+
+        {# show Django messages #}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+
         <div class="mb-3">
           <label class="form-label">Amount to pay (UGX)</label>
-          <input class="form-control" type="number" name="pay_amount" min="0" step="0.01" required>
+          <input
+            class="form-control"
+            type="number"
+            name="pay_amount"
+            step="0.01"
+            value="{{ form_data.pay_amount|default:'' }}"
+          >
+          {% if errors.pay_amount %}
+            <div class="text-danger small">{{ errors.pay_amount }}</div>
+          {% endif %}
         </div>
 
         <div class="form-actions">

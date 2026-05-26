@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load humanize %}
+{% load humanize static %}
 
 {% block content %}
 
@@ -8,7 +8,7 @@
         <div class="dashboard-toolbar mb-0">
             <div>
                 <h1 class="mb-1" style="font-size:large;">Products</h1>
-               
+
             </div>
             <div class="report-actions">
                 <a href="{% url 'add_product' %}" class="btn btn-warning"><i class="bi bi-plus-lg me-1"></i>Add
@@ -19,9 +19,13 @@
                     <div class="col-md-3">
                         <div class="card-custom stock-table-card h-100">
                             <div class="card-custom-body">
-                                <div class="text-muted metric-label">Total Products</div>
-                                <div class="h3 mb-0 mt-3" style="color:rgb(32, 29, 102);font-size:1.5rem;">{{ totals.total_products|intcomma }}</div>
-                                
+                                <div class="text-muted metric-label">Total Products<img
+                                        src="{% static 'products.svg' %}" alt="Revenue" class="icon icon--metric ms-2">
+                                </div>
+                                <div class="h3 mb-0 mt-3" style="color:rgb(32, 29, 102);font-size:1.5rem;">
+                                    {{ totals.total_products|intcomma }}</div>
+                                    
+
                             </div>
                         </div>
                     </div>
@@ -29,9 +33,11 @@
                     <div class="col-md-3">
                         <div class="card-custom stock-table-card h-100">
                             <div class="card-custom-body">
-                                <div class="text-muted metric-label">Total Quantity</div>
+                                <div class="text-muted metric-label">Total Quantity<img
+                                        src="{% static 'quantity.png' %}" alt="Revenue" class="icon icon--metric ms-2">
+                                </div>
                                 <div class="h3 mb-0 mt-3" style="color:rgb(32, 29, 102);font-size:1.5rem;">{{ totals.total_quantity|floatformat:0|intcomma }}</div>
-                                
+
                             </div>
                         </div>
                     </div>
@@ -39,9 +45,11 @@
                     <div class="col-md-3">
                         <div class="card-custom stock-table-card h-100">
                             <div class="card-custom-body">
-                                <div class="text-muted metric-label">Total Stock Value</div>
+                                <div class="text-muted metric-label">Total Stock Value<img
+                                        src="{% static 'revenue.svg' %}" alt="Revenue" class="icon icon--metric ms-2">
+                                </div>
                                 <div class="h3 mb-0 mt-3" style="color:rgb(32, 29, 102);font-size:1.5rem;">UGX {{ totals.stock_value|floatformat:0|intcomma }}</div>
-                               
+
                             </div>
                         </div>
                     </div>
@@ -49,9 +57,10 @@
                     <div class="col-md-3">
                         <div class="card-custom stock-table-card h-100">
                             <div class="card-custom-body">
-                                <div class="text-muted metric-label">Low Stock Items</div>
+                                <div class="text-muted metric-label">Low Stock Items<img src="{% static 'items.svg' %}"
+                                        alt="Items sold" class="icon icon--metric ms-2"></div>
                                 <div class="h3 mb-0 mt-3" style="color:rgb(32, 29, 102);font-size:1.5rem;">{{ totals.low_stock_items|intcomma }}</div>
-                               
+
                             </div>
                         </div>
                     </div>
@@ -63,21 +72,20 @@
         </div>
     </div>
 
-    <div class="card-custom filter-card mb-4">
-        <!-- <div class="card-custom-body"> -->
-            <form method="get" class="report-filter-grid align-items-start">
-                <div>
-                    
-                    <input type="text" name="q" class="form-control" placeholder="Search by Product name or variant..."
-                        value="" />
-                </div>
-                
-                <div>
-                    <button type="submit" class="btn btn-outline-dark w-20"><i
-                            class="bi bi-filter me-1"></i>Filter</button>
-                </div>
-            </form>
-        <!-- </div> -->
+    <div class="card-custom filter-card mb-2 mt-5">
+
+        <form method="get" class="report-filter-grid align-items-start">
+            <div>
+
+                <input type="text" name="q" class="form-control" placeholder="Search by Category"
+                    value="" />
+            </div>
+
+            <div>
+                <button type="submit" class="btn btn-outline-dark w-20"><i class="bi bi-filter me-1"></i>Filter</button>
+            </div>
+        </form>
+
     </div>
 
     <div class="card-custom stock-table-card">
@@ -97,33 +105,24 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for product in products %}
+                        {% for row in product_rows %}
+                        {% with product=row.product stock_status=row.stock_status %}
                         <tr class="stock-row">
                             <td>{{ product.date_added|date:"F j" }}</td>
                             <td class="fw-semibold">{{ product.product_name }}</td>
                             <td>{{ product.category.name }}</td>
-                            <td>{{ product.stock|intcomma }}</td>
+                            <td>{{product.stock|intcomma }}</td>
 
                             <td>
-                                {% if product.stock_status == "In Stock" %}
-                                <span class="badge stock-badge bg-success-subtle text-success">
-                                    In Stock
-                                </span>
-
-                                {% elif product.stock_status == "Low Stock" %}
-                                <span class="badge stock-badge bg-warning-subtle text-warning">
-                                    Low Stock
-                                </span>
-
-                                {% elif product.stock_status == "Out of Stock" %}
-                                <span class="badge stock-badge bg-danger-subtle text-danger">
-                                    Out of Stock
-                                </span>
-
+                                {% if stock_status == "In Stock" %}
+                                <span class="badge stock-badge bg-success-subtle text-success">In Stock</span>
+                                {% elif stock_status == "Low Stock" %}
+                                <span class="badge stock-badge bg-warning-subtle text-warning">Low Stock</span>
+                                {% elif stock_status == "Out of Stock" %}
+                                <span class="badge stock-badge bg-danger-subtle text-danger">Out of Stock</span>
                                 {% else %}
-                                <span class="badge stock-badge bg-secondary-subtle text-secondary">
-                                    {{ product.stock_status }}
-                                </span>
+                                <span class="badge stock-badge bg-secondary-subtle text-secondary">{{ stock_status
+                                    }}</span>
                                 {% endif %}
                             </td>
 
@@ -139,10 +138,12 @@
                                 </div>
                             </td>
                         </tr>
+                        {% endwith %}
                         {% empty %}
                         <tr>
                             <td colspan="8" class="text-center py-4">No products found.</td>
                         </tr>
+
                         {% endfor %}
                     </tbody>
                 </table>

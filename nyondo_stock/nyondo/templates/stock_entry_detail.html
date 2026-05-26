@@ -15,7 +15,7 @@
     </div>
   </div>
 
-  <div class="metric-grid mb-4">
+  <div class="metric-grid mb-4 mt-3">
     <div class="metric-card"><div class="metric-label">Product</div><div class="metric-value">{{ entry.product.product_name }}</div></div>
     <div class="metric-card"><div class="metric-label">Supplier</div><div class="metric-value">{{ entry.supplier.name }}</div></div>
     <div class="metric-card"><div class="metric-label">Quantity</div><div class="metric-value">{{ entry.quantity }}</div></div>
@@ -23,10 +23,10 @@
   </div>
 
   <div class="metric-grid mb-4">
-    <div class="metric-card"><div class="metric-label">Unit Cost</div><div class="metric-value">UGX {{ entry.unit_cost|floatformat:0 }}</div></div>
-    <div class="metric-card"><div class="metric-label">Total</div><div class="metric-value">UGX {{ entry.total|floatformat:0 }}</div></div>
-    <div class="metric-card"><div class="metric-label">Amount Paid</div><div class="metric-value">UGX {{ entry.amount_paid|floatformat:0 }}</div></div>
-    <div class="metric-card metric-card--highlight"><div class="metric-label">Balance Due</div><div class="metric-value">UGX {{ entry.balance_due|floatformat:0 }}</div></div>
+    <div class="metric-card"><div class="metric-label">Unit Cost</div><div class="metric-value">UGX {{ entry.unit_cost|floatformat:0|intcomma }}</div></div>
+    <div class="metric-card"><div class="metric-label">Total</div><div class="metric-value">UGX {{ entry.total|floatformat:0|intcomma }}</div></div>
+    <div class="metric-card"><div class="metric-label">Amount Paid</div><div class="metric-value">UGX {{ entry.amount_paid|floatformat:0|intcomma }}</div></div>
+    <div class="metric-card metric-card--highlight"><div class="metric-label">Balance Due</div><div class="metric-value">UGX {{ entry.balance_due|floatformat:0|intcomma }}</div></div>
   </div>
 </div>
 {% endblock %}
